@@ -90,12 +90,11 @@ class ChatActivity extends Component {
     render() {
         const { search } = this.state;
         return (
-            <List>
-            <Container >
-            {
-                users.map((l, i) => {
-                    return (
-                        <Content>                            
+            <Container>
+                <List>                
+                {
+                    users.map((l, i) => {
+                        return (                           
                                 <ListItem key={i} avatar onPress={ () => this.openDetailedChatView()}>
                                     <Left>
                                         <Thumbnail source={{ uri: l.avatar }} />
@@ -109,14 +108,14 @@ class ChatActivity extends Component {
                                     <Right>
                                         <Text note>{l.time}</Text>
                                     </Right>
-                                </ListItem>
-                           
-                        </Content>
-                    );
-                })
-            }      
-             </List>  
-            </Container>
+                                </ListItem>                                                      
+                        );
+                    })
+                } 
+                </List>  
+            </Container>     
+            
+            
             
          
         );
