@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import { Platform, StyleSheet, Text, View, Button} from 'react-native';
 
-class HomeActivity extends React.Component {
+class Home extends React.Component {
     static navigationOptions = {
         title: 'Home',
         headerStyle: {
@@ -39,4 +39,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default HomeActivity;
+export default Home;

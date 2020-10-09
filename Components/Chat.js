@@ -61,7 +61,7 @@ const users = [
    
      
    
-class ChatActivity extends Component {
+class Chat extends Component {
 
     state = {
         search: '',
@@ -72,8 +72,9 @@ class ChatActivity extends Component {
     
     };
 
-    openDetailedChatView = () => {
-        this.props.navigation.navigate('DetailedChat')
+    openDetailedChatView = (name) => {
+        // navigation.setParams({ title: name })
+        this.props.navigation.navigate('NewChat');
         // alert("yeah working");
     }
 
@@ -95,7 +96,8 @@ class ChatActivity extends Component {
                 {
                     users.map((l, i) => {
                         return (                           
-                                <ListItem key={i} avatar onPress={ () => this.openDetailedChatView()}>
+                                <ListItem key={i} avatar onPress={ () => {
+                                    this.openDetailedChatView(l.name)}}>
                                     <Left>
                                         <Thumbnail source={{ uri: l.avatar }} />
                                     </Left>
@@ -141,4 +143,4 @@ class ChatActivity extends Component {
     
 // });
 
-export default ChatActivity;
+export default Chat;
