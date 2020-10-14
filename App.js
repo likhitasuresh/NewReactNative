@@ -6,10 +6,10 @@ import {createStackNavigator} from '@react-navigation/stack';
 import Home from './Components/Home';
 import Chat from './Components/Chat';
 import DetailedChat from './Components/DetailedChat';
-import { NewChat } from './Components/NewChat';
+import  NewChat  from './Components/NewChat';
 const Stack = createStackNavigator();
 
-export default function App() {
+export default function App() {  
   return (
     <NavigationContainer>
       <Stack.Navigator>
@@ -21,11 +21,18 @@ export default function App() {
       <Stack.Screen
         name="Chat"
         component={Chat}
+        options={{
+          title: "Chats", 
+          headerStyle: {
+            backgroundColor: '#5386c9',
+          },         
+        }}
+        
       />
       <Stack.Screen
         name="NewChat"
         component={NewChat}
-        options={{ title: "Brynn Tarth" }}
+        options={({ route }) => ({ title: route.params.name })}
       />
       <Stack.Screen
           name="DetailedChat"

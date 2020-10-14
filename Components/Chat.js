@@ -1,83 +1,50 @@
 import React, {Component} from 'react';
 // import { Platform, StyleSheet, View, Image} from 'react-native';
 // impor t { Card, ListItem, Button, Icon, SearchBar,  Avatar, Badge } from 'react-native-elements';
-import { Container, Header, Content, List, ListItem, Left, Body, Right, Thumbnail, Text } from 'native-base';
-
+import { Container, Header, Content, List, ListItem, Left, Body, Right, Thumbnail, Text, Badge } from 'native-base';
 import { event } from 'react-native-reanimated';
+import {users} from '../Data/users';
+import { LogBox } from 'react-native';
 
-
-const users = [
-    {
-       name: 'Brynn Tarth',
-       avatar: 'https://s3.amazonaws.com/uifaces/faces/twitter/brynn/128.jpg',
-       subtitle: 'I heard about that last night. Wonder how it will affect students from here on.',
-       read: false,
-       role: 'RECRUITER',
-       time: '3:45pm'
-    },
-    {
-        name: 'Rachael Simone',
-        avatar: 'https://s3.amazonaws.com/uifaces/faces/twitter/ladylexy/128.jpg',
-        subtitle: 'How is the job search going for you?',
-        read: true,
-        role: null,
-        time: '3:45pm'
-     },
-     {
-        name: 'Chris Jackson',
-        avatar: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Do you happen to know anyone from Altech Inc? I am really interested in their...',
-        read: true,
-        role: 'JOB SEEKER',
-        time: '3:45pm'
-     },
-     {
-        name: 'Jane Doe',
-        avatar: 'https://s3.amazonaws.com/uifaces/faces/twitter/brynn/128.jpg',
-        subtitle: 'I have referred you to my colleague at ABC. They will be reaching out to you shortly.',
-        read: false,
-        role: 'PROFESSOR',
-        time: '3:45pm'
-     },
-     {
-        name: 'Robert Brown McCarthy',
-        avatar: 'https://randomuser.me/api/portraits/men/41.jpg',
-        subtitle: 'I had no idea!',
-        read: false,
-        role: null,
-        time: '3:45pm'
-     },
-     {
-        name: 'Justine Horner',
-        avatar: 'https://s3.amazonaws.com/uifaces/faces/twitter/ladylexy/128.jpg',
-        subtitle: 'Happy to share my resume!',
-        read: true,
-        role: null,
-        time: '3:45pm'
-     },
-
-    
-   ];
-   
-     
+LogBox.ignoreLogs([
+    'Non-serializable values were found in the navigation state',
+  ]);     
    
 class Chat extends Component {
 
-    state = {
-        search: '',
-      };
+    constructor(props){
+        super(props);
+        this.navigate = this.props.navigation.navigate;
+        this.state = {
+            search: '',
+            read: null,
+            newMessages: 0,
+            users: users
+          };
+    }
 
+    
     updateSearch = (search) => {
         this.setState({ search });
     
     };
 
-    openDetailedChatView = (name) => {
-        // navigation.setParams({ title: name })
-        this.props.navigation.navigate('NewChat');
-        // alert("yeah working");
+    openDetailedChatView = (name, messages, i) => {
+        // navigation.setParams({ title: name })        
+        this.navigate('NewChat', { 
+            name: name,
+            messages: messages,
+            usersAppendMessage: (messages, i) => this.appendMessage(messages, i),
+            index: i
+          });        
     }
-
+    appendMessage(messages, i){
+        this.setState((state) => {            
+            state.users[i].messages.unshift(messages);
+            // console.log(state.users[i].messages);
+            return state;
+        })
+    }
     static navigationOptions = {
         title: 'Chat',
         headerStyle: {
@@ -94,23 +61,32 @@ class Chat extends Component {
             <Container>
                 <List>                
                 {
-                    users.map((l, i) => {
+                    this.state.users.map((l, i) => {                        
                         return (                           
-                                <ListItem key={i} avatar onPress={ () => {
-                                    this.openDetailedChatView(l.name)}}>
-                                    <Left>
-                                        <Thumbnail source={{ uri: l.avatar }} />
+                            <ListItem key={i} avatar onPress={ () => {
+                                this.openDetailedChatView(l.name, l.messages, i);                                   
+                                 this.setState((state) => {
+                                    state.users[i].read = true;
+                                    state.users[i].newMessages = '0'
+                                    return state;
+                                 })                               
+                                }}>
+                                <Left>
+                                    <Thumbnail source={{ uri: l.avatar }} />
+                                    {
+                                        l.newMessages=='0' ? <></> : <Badge style={{ backgroundColor: '#5386C9', position:"absolute" }}><Text>{l.newMessages}</Text></Badge>
+                                    }
                                     </Left>
-                                    <Body>
-                                        <Text>{l.name}</Text>
-                                        {
-                                            !l.read ? <Text style={ {fontWeight: 'bold', color: 'black'}}>{l.subtitle}</Text> :  <Text>{l.subtitle}</Text>                                             
-                                        }
-                                    </Body>
-                                    <Right>
-                                        <Text note>{l.time}</Text>
-                                    </Right>
-                                </ListItem>                                                      
+                                <Body>
+                                    <Text>{l.name}</Text>
+                                    {
+                                        !l.read ? <Text style={ {fontWeight: 'bold', color: 'black'}}>{l.messages[0].text}</Text> :  <Text>{l.messages[0].text}</Text>                                             
+                                    }
+                                </Body>
+                                <Right>
+                                <Text note>{new Date(l.messages[0].createdAt.getTime()).toString().substring(16, 21)}</Text>
+                                </Right>
+                            </ListItem>                                                      
                         );
                     })
                 } 
@@ -123,24 +99,6 @@ class Chat extends Component {
         );
     }
 }
-// const styles = StyleSheet.create({
-//     container: {
-//         flex: 1,
-//         justifyContent: 'center',
-//         alignItems: 'center',
-//         backgroundColor: '#F5FCFF',
-//         },
-//     headerText: {
-//         fontSize: 20,
-//         textAlign: 'center',
-//         margin: 10,
-//         fontWeight: 'bold'
-//         },
-//     listItemTitle: {
-//         fontWeight: 'bold',
-//         fontSize: 18,
-//     }
-    
-// });
+
 
 export default Chat;

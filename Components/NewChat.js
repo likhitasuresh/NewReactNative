@@ -1,46 +1,92 @@
-import React, { useState, useCallback, useEffect } from 'react'
-import { GiftedChat } from 'react-native-gifted-chat'
+import React, { Component, useState, useCallback, useEffect } from 'react'
+import { GiftedChat, Bubble, Send} from 'react-native-gifted-chat'
+import {Text, View, StyleSheet} from 'react-native';
 
-export function NewChat() {
-  const [messages, setMessages] = useState([]);
+const styles = StyleSheet.create({
+  sendingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center'
+  }
+});
+class NewChat extends Component{
+   
 
-  useEffect(() => {
-    setMessages([
+  constructor(props){
+    super(props);
+    this.params = this.props.route.params;
+    this.state = {
+      messages: this.params.messages,      
+    }
+  }
+
+  
+
+  componentDidMount(){
+    // console.log(this.props.route.params)    
+  }
+  
+  onSend(messages){
+    console.log(messages)
+    this.params.usersAppendMessage(messages[0], this.params.index);    
+    this.setState({
+      messages: GiftedChat.append(this.state.messages, messages[0])
+    })
+
+  }
+  renderSend(props) {
+    return (
+      <Send {...props}>
+        {/* <View style={{alignItems: 'center' }}> */}
+          <Text style={{fontSize: 20, color: "#5386C9", paddingBottom: "3%", paddingRight: "1%"}}>Send</Text>
+        {/* </View> */}
+      </Send>
+    );
+  }
+  renderBubble (props) {
+    return (
+      <Bubble
+        {...props}
+        wrapperStyle={{
+          left: {
+            backgroundColor: '#fff'
+          },
+          right: {
+            backgroundColor: '#5386C9'
+          },
+        }}
+      />
+    )
+  }
+  parsePatterns = (_linkStyle) => {
+    return [
       {
-        _id: 1,
-        text: 'Hello developer',
-        createdAt: new Date(),
-        user: {
-          _id: 2,
-          name: 'React Native',
-          avatar: 'https://placeimg.com/140/140/any',
-        },
-        
+        pattern: /#(\w+)/,
+        style: { textDecorationLine: 'underline', color: 'darkorange' },
+        onPress: () => Linking.openURL('http://gifted.chat'),
       },
-      {
-        _id: 2,
-        text: 'Hello Brynn',
-        createdAt: new Date(),
-        user: {
-          _id: 1,
-          name: 'React Native',
-          avatar: 'https://placeimg.com/140/140/any',
-        },
-      },
-    ])
-  }, [])
-
-  const onSend = useCallback((messages = []) => {
-    setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
-  }, [])
-
-  return (
-    <GiftedChat
-      messages={messages}
-      onSend={messages => onSend(messages)}
-      user={{
-        _id: 1,
-      }}
-    />
-  )
+    ]
+  }
+  render(){
+    return(
+      <>
+        <GiftedChat
+            messages={this.state.messages}
+            onSend={messages => this.onSend(messages)}
+            user={{
+              _id: 1,
+            }}
+            renderBubble={this.renderBubble}
+            isTyping ={true}
+            alwaysShowSend={true}
+            // showUserAvatar={true}
+            // bottomOffset={100}
+            parsePatterns={this.parsePatterns}
+            renderSend={this.renderSend}
+          />
+      </>
+      
+    );
+  }
 }
+
+export default NewChat;
