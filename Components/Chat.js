@@ -37,12 +37,12 @@ class Chat extends Component {
         this.userEmail = 'louis@nuleep-user.com';
         this.connectMessagingClient(
             this.getToken(this.userEmail));
-        //this.loadChannelList();
+        this.loadChannelList();
 
 
         //let test = this.state.chatClient.getUserChannelDescriptors();
         //TEST PART!!! HAZARDOUS
-        //this.TEST_create_channel('janesmith@nuleep-rec.com');
+        this.TEST_create_channel('janesmith@nuleep-rec.com');
         //
     }
 
@@ -89,6 +89,10 @@ class Chat extends Component {
             });
             newChannel.invite(otherUserEmail);
         }
+        else
+        {
+            //TODO: connect to the existing chat
+        }
         //TODO: start listening for the events
         this.state.chatClient.on('messageAdded',() => {});
     };
@@ -107,16 +111,16 @@ class Chat extends Component {
           //TODO: except
       }
 
-      this.state.chatClient.getUserChannelDescriptors().then((channelDescriptiors) => {
+      this.state.chatClient.getUserChannelDescriptors().then((paginator) => {
               //TODO: 1)sortChannels by the date of the last received message
               //      2)We might want use this part of code but with different handlers.
               //      3)Assign the state chat list with the channels (perhaps have the dict of format channel:displayed name)
               //sortByLastMsgDate(channels);
               //fetchDialogueName(channels);
               //stripAndOtherPreprocessing(channels);
-              for(let i = 0;i<channelDescriptiors.length;i++)
+              for(let i = 0;i<paginator.items.length;i++)
               {
-                  this.state.channelsList.push(channelDescriptiors[i]);
+                  this.state.channelsList.push(paginator.items[i]);
                   //TODO: bind to channel event listeners
               }
               this.state.channelsList.sort((channel_a,channel_b) =>
@@ -182,7 +186,7 @@ class Chat extends Component {
         // 'Chat is empty' otherwise.
         try
         {
-            return channel.getMessages(1);
+            return channel.getMessages(1).items[0];
         }
         catch (exception)
         {
@@ -212,7 +216,7 @@ class Chat extends Component {
         //otherwise ???
         try
         {
-            return channel.getMessages(batchSize);
+            return channel.getMessages(batchSize).items;
         }
         catch (exception)
         {
