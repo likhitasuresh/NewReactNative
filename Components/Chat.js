@@ -54,6 +54,7 @@ class Chat extends Component {
     connectMessagingClient =  (accessToken) => {
         TwilioChatClient.create(accessToken).then((client) => {
             this.state.chatClient = client;
+            this.state.chatClient.reachabilityEnabled = true;
             //TODO: 1)subscribe to all needed events
             this.state.chatClient.on('tokenExpired',this.refreshToken);
             this.state.chatClient.on('channelAdded',() => {});
@@ -61,6 +62,8 @@ class Chat extends Component {
         });
     };
 
+    //TODO: !!! Do we need to call client creation again here? Seems likely:
+    // E.g. updateToken(token) => Client http://media.twiliocdn.com/sdk/js/chat/releases/4.0.0/docs/Client.html#updateToken__anchor
     refreshToken = () => {
         this.state.chatClient.updateToken(
             this.getToken(this.userEmail));
@@ -94,6 +97,7 @@ class Chat extends Component {
             //TODO: connect to the existing chat
         }
         //TODO: start listening for the events
+        //      messageAdded -> rearrange the channels list using insertSortChannelsByMessageDate method for sorting
         this.state.chatClient.on('messageAdded',() => {});
     };
 
@@ -270,7 +274,7 @@ class Chat extends Component {
                     //          interlocutor name -> getInterlocutorName(channel)
                     //          unread messages budge -> getUnconsumedMessagesNumber(channel)
                     //          unread state -> getConsumtionState(channel)
-                    //          last message text -> getLastMessageText(channel)
+                    //          last message text -> getLastMessage(channel)
                     //          last messgae date -> getLastMessageDate(channel)
                     //          load first batch of messages -> getMessageBatch(channel,batchSize=30)
                     this.state.channelsList.map((channel) => {
