@@ -62,8 +62,6 @@ class Chat extends Component {
     };
 
     refreshToken = () => {
-        //TODO: 1) fetch new token - X
-        //      2) set the token - X
         this.state.chatClient.updateToken(
             this.getToken(this.userEmail));
     };
