@@ -117,6 +117,7 @@ class Chat extends Component {
               for(let i = 0;i<channelDescriptiors.length;i++)
               {
                   this.state.channelsList.push(channelDescriptiors[i]);
+                  //TODO: bind to channel event listeners
               }
               this.state.channelsList.sort((channel_a,channel_b) =>
                   (channel_a.lastMessage.dateCreated > channel_b.lastMessage.dateCreated) ? 1:
