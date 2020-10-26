@@ -1,6 +1,7 @@
 import React, { Component, useState, useCallback, useEffect } from 'react'
 import { GiftedChat, Bubble, Send} from 'react-native-gifted-chat'
 import {Text, View, StyleSheet} from 'react-native';
+import { Client as TwilioChatClient } from "twilio-chat";
 
 const styles = StyleSheet.create({
   sendingContainer: {
@@ -9,30 +10,51 @@ const styles = StyleSheet.create({
   }
 });
 class NewChat extends Component{
-   
-
   constructor(props){
     super(props);
     this.params = this.props.route.params;
+    this.channel = this.params.channel;
     this.state = {
-      messages: this.params.messages,      
+      messages: this.params.messages,
     }
   }
 
-  
+  getMessageBatch = (channel,batchSize=30) =>
+  {
+    //Loads a batch of batchSize last messages in the channel,
+    //otherwise ???
+    try
+    {
+      return channel.getMessages(batchSize);
+    }
+    catch (exception)
+    {
+      return '';
+    }
+  }
+
 
   componentDidMount(){
-    // console.log(this.props.route.params)    
+    // console.log(this.props.route.params)
   }
-  
+
+  //TODO: Ask Likhita about this quite strange way to handle new messgaes
   onSend(messages){
     console.log(messages)
-    this.params.usersAppendMessage(messages[0], this.params.index);    
-    this.setState({
-      messages: GiftedChat.append(this.state.messages, messages[0])
-    })
-
+    try
+    {
+      this.channel.sendMessage(messages[0]);
+      this.params.usersAppendMessage(messages[0], this.params.index);
+      this.setState(
+          {messages: GiftedChat.append(this.state.messages, messages[0])}
+          );
+    }
+    catch (exception)
+    {
+      //TODO: add the message locally and display that is has not been sent
+    }
   }
+
   renderSend(props) {
     return (
       <Send {...props}>
@@ -72,9 +94,7 @@ class NewChat extends Component{
         <GiftedChat
             messages={this.state.messages}
             onSend={messages => this.onSend(messages)}
-            user={{
-              _id: 1,
-            }}
+            user={{_id: 1,}}
             renderBubble={this.renderBubble}
             isTyping ={true}
             alwaysShowSend={true}
@@ -84,7 +104,7 @@ class NewChat extends Component{
             renderSend={this.renderSend}
           />
       </>
-      
+
     );
   }
 }
