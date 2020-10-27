@@ -1,6 +1,4 @@
 import React, {Component} from 'react';
-// import { Platform, StyleSheet, View, Image} from 'react-native';
-// impor t { Card, ListItem, Button, Icon, SearchBar,  Avatar, Badge } from 'react-native-elements';
 import { Container, Header, Content, List, ListItem, Left, Body, Right, Thumbnail, Text, Badge } from 'native-base';
 import { event } from 'react-native-reanimated';
 import {users} from '../Data/users';
@@ -40,15 +38,15 @@ class Chat extends Component {
         this.loadChannelList();
 
 
-        //let test = this.state.chatClient.getUserChannelDescriptors();
         //TEST PART!!! HAZARDOUS
+        //let test = this.state.chatClient.getUserChannelDescriptors();
         this.TEST_create_channel('janesmith@nuleep-rec.com');
         //
     }
 
     getToken = (userName) => {
       //TODO: use gql to fetch the token
-        return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTS2JiZDMyMTdiMGVhMTAzZDBiMDc1ZmE2NmFjM2IyNGYxLTE2MDM2NzQ3OTgiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjAzNjc0Nzk4LCJleHAiOjE2MDM2ODkxOTgsImlzcyI6IlNLYmJkMzIxN2IwZWExMDNkMGIwNzVmYTY2YWMzYjI0ZjEiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.PVNHGK2tMmPoIw7v8zVpNyesXImiYd0D--wW68u-48E';
+        return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTS2YzZmQxODE1NTIxNGJjMzEwN2EwMzRmMDcxNjA4MzAyLTE2MDM3NjU5ODMiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjAzNzY1OTgzLCJleHAiOjE2MDM3ODAzODMsImlzcyI6IlNLZjNmZDE4MTU1MjE0YmMzMTA3YTAzNGYwNzE2MDgzMDIiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.45Ww_Y4MYTPKic3Nq8pZm_ZkUFZKk-RygB04BdoF8w4';
     };
 
     connectMessagingClient =  (accessToken) => {
@@ -103,6 +101,7 @@ class Chat extends Component {
 
     getUniqueChannelName = (userEmail_a,userEmail_b) => {
         //Creates unique chat name that contains both user names in a uniform way.
+        //uniqueName - concatenation with * of the sorted array of the user ids.
         let user_list = [userEmail_a,userEmail_b].sort();
         return user_list.join('*');
     };
