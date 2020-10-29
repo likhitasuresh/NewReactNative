@@ -3,7 +3,9 @@ import { Container, Header, Content, List, ListItem, Left, Body, Right, Thumbnai
 import { event } from 'react-native-reanimated';
 import {users} from '../Data/users';
 import { LogBox } from 'react-native';
-import {Client as TwilioChatClient} from "twilio-chat";
+import TwilioChatManager from '../ChatManager/TwilioChatManager';
+import EventEmitter from "react-native-web/dist/vendor/react-native/emitter/EventEmitter";
+
 
 LogBox.ignoreLogs([
     'Non-serializable values were found in the navigation state',
@@ -19,45 +21,55 @@ class Chat extends Component {
             read: null,
             newMessages: 0,
             users: users,
-            chatClient: {},
-            channelsList: null
+            chatClient: null,
+            channelList: [],
+            chatManager: null,
+            isLoading: true
         };
-
-        //TODO: Be able 1)to get username
-        //              2)to fetch twilio accessToken from backend
-        //              3)create chat client - X
-        //              4)update UI (load all the chats, new messages etc.)
-        //                  a.Sort channels by message date (somehow) :
-        //                  channels have uniq and friendly names, we want to display name of the person we are chatting with
-        //                  this we have to save the info in the descriptor somehow. How can we do that and be able to dispay proper name for each
-        //                  person in the dialogue
-        //              5)subscribe for all needed events
-        this.userEmail = 'louis@nuleep-user.com';
-        this.connectMessagingClient(
-            this.getToken(this.userEmail));
-        this.loadChannelList();
-
-
-        //TEST PART!!! HAZARDOUS
-        //let test = this.state.chatClient.getUserChannelDescriptors();
-        this.TEST_create_channel('janesmith@nuleep-rec.com');
-        //
     }
+
+    componentDidMount() {
+        this.userEmail = 'louis@nuleep-user.com';
+        this.state.chatManager = new TwilioChatManager(this.userEmail,this);
+
+        this.state.chatManager.eventEmitter.addListener('channels-loaded',()=>
+        {
+            console.log('Manager data inside component:');
+            console.log(this.state.chatManager.channels);
+            this.setState({channelList: [...this.state.chatManager.channels]});
+        });
+    }
+
 
     getToken = (userName) => {
       //TODO: use gql to fetch the token
-        return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTS2YzZmQxODE1NTIxNGJjMzEwN2EwMzRmMDcxNjA4MzAyLTE2MDM3NjU5ODMiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjAzNzY1OTgzLCJleHAiOjE2MDM3ODAzODMsImlzcyI6IlNLZjNmZDE4MTU1MjE0YmMzMTA3YTAzNGYwNzE2MDgzMDIiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.45Ww_Y4MYTPKic3Nq8pZm_ZkUFZKk-RygB04BdoF8w4';
+        return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTS2FmN2NiZDlhOTQwNTE4YWE2YjRjZGYyNDFiYmRiNjkwLTE2MDM4NTIxNTAiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjAzODUyMTUwLCJleHAiOjE2MDM4NjY1NTAsImlzcyI6IlNLYWY3Y2JkOWE5NDA1MThhYTZiNGNkZjI0MWJiZGI2OTAiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.TqLIBVn-wzPixDcFtOE-QUIlZEoUbAP7avFNTQB92o0';
     };
 
-    connectMessagingClient =  (accessToken) => {
-        TwilioChatClient.create(accessToken).then((client) => {
+    connectMessagingClient = (accessToken) => {
+      /* TwilioChatClient.create(accessToken).then((client) => {
             this.state.chatClient = client;
-            this.state.chatClient.reachabilityEnabled = true;
             //TODO: 1)subscribe to all needed events
             this.state.chatClient.on('tokenExpired',this.refreshToken);
             this.state.chatClient.on('channelAdded',() => {});
             this.state.chatClient.on('channelRemoved',() => {});
+        });*/
+
+        let status = TwilioChatClient.create(accessToken,{}).then((client) => {
+            this.state.chatClient = client;
+            /*//console.log('Client connection status'+this.state.chatClient.connectionState);
+            //console.log('Finding channel');
+            let channel = client.getChannelByUniqueName('test_channel').then((channel) => {
+                console.log('Members: ');
+                console.log(channel.getMembers());
+            });
+            console.log(channel);
+            console.log(client.getUserDescriptor(this.userEmail));
+            console.log(client.getUserChannelDescriptors());*/
         });
+        console.log(status);
+        console.log(this.state.chatClient);
+
     };
 
     //TODO: !!! Do we need to call client creation again here? Seems likely:
@@ -109,26 +121,34 @@ class Chat extends Component {
     loadChannelList = () => {
       //Loads the channels user is subscribed to
       //Sorts them with accordance to the last message in the channel
-      if (this.state.chatClient == undefined)
+      if (this.state.chatClient === undefined)
       {
           //TODO: except
       }
 
       this.state.chatClient.getUserChannelDescriptors().then((paginator) => {
-              //TODO: 1)sortChannels by the date of the last received message
+              //TODO: 0) Check if there are any channels at all
+              //      1)sortChannels by the date of the last received message
               //      2)We might want use this part of code but with different handlers.
               //      3)Assign the state chat list with the channels (perhaps have the dict of format channel:displayed name)
               //sortByLastMsgDate(channels);
               //fetchDialogueName(channels);
               //stripAndOtherPreprocessing(channels);
-              for(let i = 0;i<paginator.items.length;i++)
-              {
-                  this.state.channelsList.push(paginator.items[i]);
-                  //TODO: bind to channel event listeners
-              }
-              this.state.channelsList.sort((channel_a,channel_b) =>
-                  (channel_a.lastMessage.dateCreated > channel_b.lastMessage.dateCreated) ? 1:
-                      (channel_b.lastMessage.dateCreated > channel_a.lastMessage.dateCreated ? -1 : 0));
+             if(paginator.items.length > 0)
+             {
+                 this.state.channelsList = [];
+             }
+             else
+             {
+                 for(let i = 0;i<paginator.items.length;i++)
+                 {
+                     this.state.channelsList.push(paginator.items[i]);
+                     //TODO: bind to channel event listeners
+                 }
+                 this.state.channelsList.sort((channel_a,channel_b) =>
+                     (channel_a.lastMessage.dateCreated > channel_b.lastMessage.dateCreated) ? 1:
+                         (channel_b.lastMessage.dateCreated > channel_a.lastMessage.dateCreated ? -1 : 0));
+             }
 
           });
     };
@@ -263,57 +283,67 @@ class Chat extends Component {
 
     render() {
         const { search } = this.state;
-        return (
-            <Container>
+        console.log("Chack val: "+this.state.channelList.length.toString());
+        if (this.state.channelList.length > 0)
+        {
+            return (
+                <Container>
                 <List>
-                {
-                    //TODO: map this.state.channelsList the similar view
-                    //      pass channel to the NewChat component
-                    //      initialize the components with channel metadata:
-                    //          interlocutor name -> getInterlocutorName(channel)
-                    //          unread messages budge -> getUnconsumedMessagesNumber(channel)
-                    //          unread state -> getConsumtionState(channel)
-                    //          last message text -> getLastMessage(channel)
-                    //          last messgae date -> getLastMessageDate(channel)
-                    //          load first batch of messages -> getMessageBatch(channel,batchSize=30)
-                    this.state.channelsList.map((channel) => {
-                        return (
-                            <ListItem key={i} avatar onPress={ () => {
-                                this.openDetailedChatView(this.getInterlocutorName(channel),this.getMessageBatch(channel),channel);
-                                // To Likhita: what exactly does this method do?
-                                this.setState((state) => {
-                                    state.users[i].read = this.getConsumtionState(channel);
-                                    state.users[i].newMessages = this.getUnconsumedMessagesNumber(channel);
-                                    return state;
-                                 })
+                    {
+                        //TODO: map this.state.channelsList the similar view
+                        //      pass channel to the NewChat component
+                        //      initialize the components with channel metadata:
+                        //          interlocutor name -> getInterlocutorName(channel)
+                        //          unread messages budge -> getUnconsumedMessagesNumber(channel)
+                        //          unread state -> getConsumtionState(channel)
+                        //          last message text -> getLastMessage(channel)
+                        //          last messgae date -> getLastMessageDate(channel)
+                        //          load first batch of messages -> getMessageBatch(channel,batchSize=30)
+                        this.state.channelList.map((channel) => {
+                            return (
+                                <ListItem key={i} avatar onPress={() => {
+                                    this.openDetailedChatView(this.getInterlocutorName(channel), this.getMessageBatch(channel), channel);
+                                    // To Likhita: what exactly does this method do?
+                                    this.setState((state) => {
+                                        state.users[i].read = this.getConsumtionState(channel);
+                                        state.users[i].newMessages = this.getUnconsumedMessagesNumber(channel);
+                                        return state;
+                                    })
                                 }}>
-                                <Left>
-                                    //TODO: ask nuleep fot a query for avatar uri's
-                                    <Thumbnail source={{ uri: l.avatar }} />
-                                    {
-                                        this.getUnconsumedMessagesNumber(channel)=='0' ? <></> :
-                                            <Badge style={{ backgroundColor: '#5386C9', position:"absolute" }}>
-                                                <Text>{this.getUnconsumedMessagesNumber(channel)}</Text></Badge>
-                                    }
+                                    <Left>
+                                        //TODO: ask nuleep fot a query for avatar uri's
+                                        <Thumbnail source={{uri: 'https://placeimg.com/140/140/any'}}/>
+                                        {
+                                            this.getUnconsumedMessagesNumber(channel) == '0' ? <></> :
+                                                <Badge style={{backgroundColor: '#5386C9', position: "absolute"}}>
+                                                    <Text>{this.getUnconsumedMessagesNumber(channel)}</Text></Badge>
+                                        }
                                     </Left>
-                                <Body>
-                                    <Text>{this.getLastMessage(channel).items[0].author}</Text>
-                                    {
-                                        !l.read ?
-                                            <Text style={ {fontWeight: 'bold', color: 'black'}}>{l.messages[0].text}</Text> :
-                                            <Text>{this.getLastMessage(channel).items[0].body}</Text>
-                                    }
-                                </Body>
-                                <Right>
-                                <Text note>{this.getLastMessageDate(this.state.channelsList[i])}</Text>
-                                </Right>
-                            </ListItem>
-                        );
-                    })
-                }
+                                    <Body>
+                                        <Text>{this.getLastMessage(channel).items[0].author}</Text>
+                                        {
+                                            !l.read ?
+                                                <Text style={{
+                                                    fontWeight: 'bold',
+                                                    color: 'black'
+                                                }}>{l.messages[0].text}</Text> :
+                                                <Text>{this.getLastMessage(channel).items[0].body}</Text>
+                                        }
+                                    </Body>
+                                    <Right>
+                                        <Text note>{this.getLastMessageDate(this.state.channelsList[i])}</Text>
+                                    </Right>
+                                </ListItem>
+                            );
+                        })
+                    }
                 </List>
             </Container>
-        );
+            )}
+        else
+        {
+            return (<Text>Loading...</Text>);
+        }
     }
 }
 
