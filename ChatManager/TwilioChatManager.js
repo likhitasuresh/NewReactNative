@@ -28,8 +28,7 @@ class TwilioChatManager
                     console.log('Downloading '+i.toString()+' channel.');
                     peginator.items[i].getChannel().then((channel) => {
                         this.channels.push(channel);
-                    }).
-                    then(() => {
+                    }).then(() => {
                         if (i === promisedLength-1) {
                             console.log('Last channel downloaded.');
                             this.eventEmitter.emit('channels-loaded', {});
@@ -46,7 +45,7 @@ class TwilioChatManager
 
     fetchNewToken = () => {
         //TODO: use gql to fetch the token
-        return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzY0ODUyYzFkOTUwMzZjMjVkMDYzNmI0YTU3ZTJhYzhiLTE2MDM5ODkxNTgiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjAzOTg5MTU4LCJleHAiOjE2MDQwMDM1NTgsImlzcyI6IlNLNjQ4NTJjMWQ5NTAzNmMyNWQwNjM2YjRhNTdlMmFjOGIiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.JiqKhx9VB9OZ73zM4sh9BLlAkAxUbwRZcjx6wewksnM';
+        return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTS2JlNGQxODVmNDM0MzdiZDY2MmFhMWUwNGU1MzdhZmNmLTE2MDQwMDM4MTciLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0MDAzODE3LCJleHAiOjE2MDQwMTgyMTcsImlzcyI6IlNLYmU0ZDE4NWY0MzQzN2JkNjYyYWExZTA0ZTUzN2FmY2YiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.9XmlD5LJO20_tm4Bnp1EZhUOfFy_jQYTBGjPV0HjPkg';
     };
 
     setNewToken = () => {
@@ -82,7 +81,6 @@ class TwilioChatManager
 
     subscribeForClientEvents = () => {
         this.chatClient.on('connectionStateChanged', this.connectionChangedEvent);
-
     }
 
 }

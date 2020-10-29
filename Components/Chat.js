@@ -68,15 +68,16 @@ class Chat extends Component {
         //Returns the number of unread messages in the channel.
         try
         {
+            console.log('Trying fetch unconsumed messages...');
             channel.getUnconsumedMessagesCount()
                 .then((result) => {
-                    if (result === 'undefined')
-                        return 'E';
+                    console.log('Uncosumed messages: '+result.toString());
                     return result.toString();
                 });
         }
         catch (exception)
         {
+            console.log('Could not load unconsumed messages.');
             return '0';
         }
     }
@@ -86,15 +87,16 @@ class Chat extends Component {
         // 'Chat is empty' otherwise.
         try
         {
-            let message = channel.getMessages(1).items[0];
-            if (message === 'undefined')
-                return 'Chat is empty';
-            else
-                return message.body;
+            let message = channel.getMessages(1).then((message) => {
+                if (message === 'undefined')
+                    return 'Empty message downloaded';
+                else
+                    return message.body;
+            });
         }
         catch (exception)
         {
-            return 'Chat is empty';
+            return exception.message.toString();
         }
     }
 
@@ -119,11 +121,12 @@ class Chat extends Component {
         //otherwise ???
         try
         {
-            return channel.lastMessage.dateCreated;
+            //TODO: Create the date parser to make it fit neatly into the markup
+            return channel.lastMessage.dateCreated.toDateString();
         }
         catch (exception)
         {
-            return '11-11-2011';
+            return 'Error loading';
         }
     }
 
@@ -209,7 +212,7 @@ class Chat extends Component {
                                             <Thumbnail source={{uri: 'https://placeimg.com/140/140/any'}}/>
                                             {
 
-                                                this.getUnconsumedMessagesNumber(channel) === '0' ? <></> :
+                                                this.getUnconsumedMessagesNumber(i) !== '0' ? <></> :
                                                     <Badge style={{backgroundColor: '#5386C9', position: "absolute"}}>
                                                         <Text>{this.getUnconsumedMessagesNumber(channel)}</Text></Badge>
                                             }
