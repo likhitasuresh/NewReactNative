@@ -7,7 +7,7 @@ import TwilioChatManager from '../ChatManager/TwilioChatManager';
 
 LogBox.ignoreLogs([
     'Non-serializable values were found in the navigation state',
-  ]);
+]);
 
 class Chat extends Component {
     //TODO: Initialiaze client here, load the channels list, subscribe for events listening.
@@ -19,7 +19,6 @@ class Chat extends Component {
             read: null,
             newMessages: 0,
             users: users,
-            chatClient: null,
             channelList: [],
             chatManager: null,
             isLoading: true
@@ -69,8 +68,12 @@ class Chat extends Component {
         //Returns the number of unread messages in the channel.
         try
         {
-            let unConsumedMessages = channel.getUnconsumedMessagesCount().toString();
-            return unConsumedMessages;
+            channel.getUnconsumedMessagesCount()
+                .then((result) => {
+                    if (result === 'undefined')
+                        return 'E';
+                    return result.toString();
+                });
         }
         catch (exception)
         {
@@ -92,6 +95,20 @@ class Chat extends Component {
         catch (exception)
         {
             return 'Chat is empty';
+        }
+    }
+
+    getChannelName = (channel) => {
+        try
+        {
+            let cname = channel.uniqueName;
+            if (cname === 'undefined')
+                return 'Error occured';
+            return cname;
+        }
+        catch (exception)
+        {
+            return 'Error occured';
         }
     }
 
@@ -137,7 +154,7 @@ class Chat extends Component {
             channel: channel,
             usersAppendMessage: (messages, i) => this.appendMessage(messages, i),
             index: i
-          });
+        });
     }
 
     appendMessage(messages, i){
@@ -152,12 +169,12 @@ class Chat extends Component {
         title: 'Chat',
         headerStyle: {
             backgroundColor: '#03A9F4',
-            },
+        },
         headerTintColor: '#fff',
         headerTitleStyle: {
             fontWeight: 'bold',
-            },
-        };
+        },
+    };
 
     render() {
         const { search } = this.state;
@@ -167,55 +184,56 @@ class Chat extends Component {
         {
             return (
                 <Container>
-                <List>
-                    {
-                        //TODO: map this.state.channelsList the similar view
-                        //      pass channel to the NewChat component
-                        //      initialize the components with channel metadata:
-                        //          interlocutor name -> getInterlocutorName(channel)
-                        //          unread messages budge -> getUnconsumedMessagesNumber(channel)
-                        //          unread state -> getConsumtionState(channel)
-                        //          last message text -> getLastMessage(channel)
-                        //          last messgae date -> getLastMessageDate(channel)
-                        //          load first batch of messages -> getMessageBatch(channel,batchSize=30)
-                        this.state.chatManager.channels.map((channel,i) => {
-                            return (
-                                <ListItem key={i} avatar onPress={() => {
-                                    this.openDetailedChatView(this.getInterlocutorName(channel), this.getMessageBatch(channel), channel);
-                                    this.setState((state) => {
-                                        state.users[i].read = this.getConsumtionState(channel);
-                                        state.users[i].newMessages = this.getUnconsumedMessagesNumber(channel);
-                                        return state;
-                                    })
-                                }}>
-                                    <Left>
-                                        <Thumbnail source={{uri: 'https://placeimg.com/140/140/any'}}/>
-                                        {
-                                            this.getUnconsumedMessagesNumber(channel) == '0' ? <></> :
-                                                <Badge style={{backgroundColor: '#5386C9', position: "absolute"}}>
-                                                    <Text>{this.getUnconsumedMessagesNumber(channel)}</Text></Badge>
-                                        }
-                                    </Left>
-                                    <Body>
-                                        <Text>{this.getLastMessage(channel)}</Text>
-                                        {
-                                            this.state.users[i].newMessages ==='0' ?
-                                                <Text style={{
-                                                    fontWeight: 'bold',
-                                                    color: 'black'
-                                                }}>Some text</Text> :
-                                                <Text>{this.getLastMessage(channel)}</Text>
-                                        }
-                                    </Body>
-                                    <Right>
-                                        <Text note>{this.getLastMessageDate(channel)}</Text>
-                                    </Right>
-                                </ListItem>
-                            );
-                        })
-                    }
-                </List>
-            </Container>
+                    <List>
+                        {
+                            //TODO: map this.state.channelsList the similar view
+                            //      pass channel to the NewChat component
+                            //      initialize the components with channel metadata:
+                            //          interlocutor name -> getInterlocutorName(channel)
+                            //          unread messages budge -> getUnconsumedMessagesNumber(channel)
+                            //          unread state -> getConsumtionState(channel)
+                            //          last message text -> getLastMessage(channel)
+                            //          last messgae date -> getLastMessageDate(channel)
+                            //          load first batch of messages -> getMessageBatch(channel,batchSize=30)
+                            this.state.chatManager.channels.map((channel,i) => {
+                                return (
+                                    <ListItem key={i} avatar onPress={() => {
+                                        this.openDetailedChatView(this.getChannelName(channel), this.getMessageBatch(channel), channel);
+                                        this.setState((state) => {
+                                            state.users[i].read = this.getConsumtionState(channel);
+                                            state.users[i].newMessages = this.getUnconsumedMessagesNumber(channel);
+                                            return state;
+                                        })
+                                    }}>
+                                        <Left>
+                                            <Thumbnail source={{uri: 'https://placeimg.com/140/140/any'}}/>
+                                            {
+
+                                                this.getUnconsumedMessagesNumber(channel) === '0' ? <></> :
+                                                    <Badge style={{backgroundColor: '#5386C9', position: "absolute"}}>
+                                                        <Text>{this.getUnconsumedMessagesNumber(channel)}</Text></Badge>
+                                            }
+                                        </Left>
+                                        <Body>
+                                            <Text>{this.getChannelName(channel)}</Text>
+                                            {
+                                                this.getUnconsumedMessagesNumber(channel) === '0' ?
+                                                    <Text style={{
+                                                        fontWeight: 'bold',
+                                                        color: 'black'
+                                                    }}>{this.getLastMessage(channel)}</Text> :
+                                                    <Text>{this.getLastMessage(channel)}</Text>
+                                            }
+                                        </Body>
+                                        <Right>
+                                            <Text note>{this.getLastMessageDate(channel)}</Text>
+                                        </Right>
+                                    </ListItem>
+                                );
+                            })
+                        }
+                    </List>
+                </Container>
             )}
         else
         {

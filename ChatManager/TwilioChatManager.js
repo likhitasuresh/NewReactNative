@@ -50,7 +50,7 @@ class TwilioChatManager
     };
 
     setNewToken = () => {
-      this.accessToken = this.fetchNewToken();
+        this.accessToken = this.fetchNewToken();
     };
 
     refreshToken = (options={}) => {
