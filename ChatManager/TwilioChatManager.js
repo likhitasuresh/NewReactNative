@@ -1,9 +1,9 @@
 import {Client as TwilioChatClient} from "twilio-chat";
-//import EventEmitter from "react-native";
 import EventEmitter from "react-native-web/dist/vendor/react-native/emitter/EventEmitter";
 
 class TwilioChatManager
 {
+    //TODO: rewrite it into a singleton pattern
     constructor(userName)
     {
         this.accessToken = null;
@@ -21,23 +21,32 @@ class TwilioChatManager
     loadChannels = () => {
         this.channels = [];
         this.chatClient.getUserChannelDescriptors().then((peginator) => {
-            if(peginator.items.length > 0)
+            let promisedLength = peginator.items.length;
+            if(promisedLength > 0)
             {
-                for(let i = 0;i<peginator.items.length;i++){
+                for(let i = 0;i<promisedLength;i++){
+                    console.log('Downloading '+i.toString()+' channel.');
                     peginator.items[i].getChannel().then((channel) => {
                         this.channels.push(channel);
+                    }).
+                    then(() => {
+                        if (i === promisedLength-1) {
+                            console.log('Last channel downloaded.');
+                            this.eventEmitter.emit('channels-loaded', {});
+                            console.log('Load body manager:');
+                            console.log(this.channels);
+                        }
                     });
                 }
-                console.log('Manager:');
-                console.log(this.channels);
-                this.eventEmitter.emit('channels-loaded',{});
             }
         });
     }
 
+
+
     fetchNewToken = () => {
         //TODO: use gql to fetch the token
-        return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzJjODcyZTQyNWNhMDBlZjFhNzdkZDY1MGY4NjgzMDY5LTE2MDM5NDI5MDUiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjAzOTQyOTA1LCJleHAiOjE2MDM5NTczMDUsImlzcyI6IlNLMmM4NzJlNDI1Y2EwMGVmMWE3N2RkNjUwZjg2ODMwNjkiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.-ucepW-ERv6AYL5OdpmrVueUzkUZjbhPtryUalqSq5I';
+        return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzY0ODUyYzFkOTUwMzZjMjVkMDYzNmI0YTU3ZTJhYzhiLTE2MDM5ODkxNTgiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjAzOTg5MTU4LCJleHAiOjE2MDQwMDM1NTgsImlzcyI6IlNLNjQ4NTJjMWQ5NTAzNmMyNWQwNjM2YjRhNTdlMmFjOGIiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.JiqKhx9VB9OZ73zM4sh9BLlAkAxUbwRZcjx6wewksnM';
     };
 
     setNewToken = () => {
@@ -57,16 +66,13 @@ class TwilioChatManager
         });
     };
 
-
-
     connectionChangedEvent = (connectionState) => {
         console.log('Connection changed: '+connectionState.toString());
         this.connectionState = connectionState;
 
         if(connectionState === 'connected'){
+            this.eventEmitter.emit('client-connected');
             this.loadChannels();
-
-            this.eventEmitter.emit('client-connect');
         }
         else if (connectionState === 'connecting'){
 
@@ -76,6 +82,7 @@ class TwilioChatManager
 
     subscribeForClientEvents = () => {
         this.chatClient.on('connectionStateChanged', this.connectionChangedEvent);
+
     }
 
 }
