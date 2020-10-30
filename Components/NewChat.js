@@ -19,28 +19,11 @@ class NewChat extends Component{
     }
   }
 
-  //TODO: anchor will be needed for loading messages not from the begining but from the point
-  // where the last downloaded batch eneded. Need to store the last batch index somewhere.
-  getMessageBatch = (channel,batchSize=30,anchor=null,direction=nul) =>
-  {
-    //Loads a batch of batchSize last messages in the channel,
-    //otherwise ???
-    try
-    {
-      return channel.getMessages(batchSize).item;
-    }
-    catch (exception)
-    {
-      return '';
-    }
-  }
-
 
   componentDidMount(){
     // console.log(this.props.route.params)
   }
 
-  //TODO: Ask Likhita about this quite strange way to handle new messgaes
   onSend(messages){
     console.log(messages)
     try

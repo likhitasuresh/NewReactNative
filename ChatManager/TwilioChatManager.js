@@ -1,5 +1,6 @@
 import {Client as TwilioChatClient} from "twilio-chat";
 import EventEmitter from "react-native-web/dist/vendor/react-native/emitter/EventEmitter";
+import ChatItem from "./ChatItem";
 
 class TwilioChatManager
 {
@@ -8,36 +9,49 @@ class TwilioChatManager
     {
         this.accessToken = null;
         this.chatClient = null;
-        this.connectionState = 'disconnected';
         this.userName = userName;
         this.eventEmitter = new EventEmitter();
 
-        this.channels = [];
+        this.chatItems = [];
 
         this.setNewToken();
         this.initializeClient();
     }
 
-    loadChannels = () => {
-        this.channels = [];
-        this.chatClient.getUserChannelDescriptors().then((peginator) => {
-            let promisedLength = peginator.items.length;
-            if(promisedLength > 0)
-            {
-                for(let i = 0;i<promisedLength;i++){
-                    console.log('Downloading '+i.toString()+' channel.');
-                    peginator.items[i].getChannel().then((channel) => {
-                        this.channels.push(channel);
-                    }).then(() => {
-                        if (i === promisedLength-1) {
-                            console.log('Last channel downloaded.');
-                            this.eventEmitter.emit('channels-loaded', {});
-                            console.log('Load body manager:');
-                            console.log(this.channels);
+    loadChannels =  () => {
+        this.chatItems = [];
+        this.chatClient.getUserChannelDescriptors().then((paginator) => {
+            Promise.all(paginator.items).then((descriptors) => {
+               let channels = [];
+                for(let i =0;i<descriptors.length;i++)
+                {
+                    this.chatItems.push(new ChatItem());
+                    channels.push(descriptors[i].getChannel());
+                }
+                Promise.all(channels).then(() => {
+                    let messageHistories = [];
+                    for(let i = 0 ;i<channels.length;i++){
+                        channels[i].then((channel) => {
+                            this.chatItems[i].setChannel(channel);
+                            messageHistories.push(channel.getMessages());
+                        });
+
+                    }
+                    Promise.all(messageHistories).then(()=>{
+                       for(let i = 0;i<messageHistories.length;i++){
+                            messageHistories[i].then((messageHistory) => {
+                                Promise.all(messageHistory.items).then((messages) => {
+                                    this.chatItems[i].setMessageHistory(messages);
+                                    this.chatItems[i].update();
+                                });
+                            });
+
                         }
                     });
-                }
-            }
+                    console.log(this.chatItems);
+                    this.eventEmitter.emit('channels-loaded', {});
+                });
+            });
         });
     }
 
@@ -45,7 +59,7 @@ class TwilioChatManager
 
     fetchNewToken = () => {
         //TODO: use gql to fetch the token
-        return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTS2JlNGQxODVmNDM0MzdiZDY2MmFhMWUwNGU1MzdhZmNmLTE2MDQwMDM4MTciLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0MDAzODE3LCJleHAiOjE2MDQwMTgyMTcsImlzcyI6IlNLYmU0ZDE4NWY0MzQzN2JkNjYyYWExZTA0ZTUzN2FmY2YiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.9XmlD5LJO20_tm4Bnp1EZhUOfFy_jQYTBGjPV0HjPkg';
+        return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzQ4NzQxOWY5Y2ExMDMyMzJmMDcyNzgwMTBiOTNiOTk3LTE2MDQwMzA0NjkiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0MDMwNDY5LCJleHAiOjE2MDQwNDQ4NjksImlzcyI6IlNLNDg3NDE5ZjljYTEwMzIzMmYwNzI3ODAxMGI5M2I5OTciLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.qiHteCWkAkaXnofAkIDJbiBpcNum2nPYIN8iNjLc8JA';
     };
 
     setNewToken = () => {

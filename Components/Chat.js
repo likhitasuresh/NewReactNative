@@ -20,12 +20,12 @@ class Chat extends Component {
             newMessages: 0,
             users: users,
             channelList: [],
-            chatManager: null,
+            chatManager: props.chatManager,
             isLoading: true
         };
-
-        this.userEmail = 'louis@nuleep-user.com';
-        this.state.chatManager = new TwilioChatManager(this.userEmail);
+        console.log(this.state.test);
+        //this.userEmail = 'louis@nuleep-user.com';
+        //this.state.chatManager = new TwilioChatManager(this.userEmail);
         this.state.chatManager.eventEmitter.addListener('channels-loaded',this.channelsLoadedHandler);
     }
 

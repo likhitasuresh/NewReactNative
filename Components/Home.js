@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import { Platform, StyleSheet, Text, View, Button} from 'react-native';
+import TwilioChatManager from '../ChatManager/TwilioChatManager';
 
 class Home extends React.Component {
     static navigationOptions = {
@@ -12,13 +13,19 @@ class Home extends React.Component {
             fontWeight: 'bold',
             },
         };
+
+    constructor() {
+        super();
+        this.chatManager = new TwilioChatManager('louis@nuleep-user.com');
+    }
+
     render() {
         return (
         <View style={styles.container}>
             <Text style={styles.headerText} >Home Activity</Text>
             <Button
             title="Go to Chat Activity"
-            onPress={() => this.props.navigation.navigate('Chat')}
+            onPress={() => {this.props.navigation.navigate('Chat'),{chatManager: this.chatManager,test: 'Test worked!'}}}
             />
         </View>
         );
