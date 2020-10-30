@@ -24,8 +24,6 @@ class Chat extends Component {
             isLoading: true
         };
         console.log(this.state.test);
-        //this.userEmail = 'louis@nuleep-user.com';
-        //this.state.chatManager = new TwilioChatManager(this.userEmail);
         this.state.chatManager.eventEmitter.addListener('channels-loaded',this.channelsLoadedHandler);
     }
 
@@ -115,14 +113,14 @@ class Chat extends Component {
     }
 
     //TODO: what to return if no messages exist in the chat?
-    getLastMessageDate = (channel) =>
+    getLastMessageDate = (message) =>
     {
         //Returns the date the last nessage in the chat was created,
         //otherwise ???
         try
         {
             //TODO: Create the date parser to make it fit neatly into the markup
-            return channel.lastMessage.dateCreated.toDateString();
+            return message.dateCreated.toDateString();
         }
         catch (exception)
         {
@@ -198,13 +196,13 @@ class Chat extends Component {
                             //          last message text -> getLastMessage(channel)
                             //          last messgae date -> getLastMessageDate(channel)
                             //          load first batch of messages -> getMessageBatch(channel,batchSize=30)
-                            this.state.chatManager.channels.map((channel,i) => {
+                            this.state.chatManager.chatItems.map((chat,i) => {
                                 return (
                                     <ListItem key={i} avatar onPress={() => {
-                                        this.openDetailedChatView(this.getChannelName(channel), this.getMessageBatch(channel), channel);
+                                        this.openDetailedChatView(chat.channel.uniqueName, chat.messageHistory, chat.channel);
                                         this.setState((state) => {
-                                            state.users[i].read = this.getConsumtionState(channel);
-                                            state.users[i].newMessages = this.getUnconsumedMessagesNumber(channel);
+                                            state.users[i].read = chat.getUnconsumedState();
+                                            state.users[i].newMessages = chat.unreadMessages;
                                             return state;
                                         })
                                     }}>
@@ -212,24 +210,24 @@ class Chat extends Component {
                                             <Thumbnail source={{uri: 'https://placeimg.com/140/140/any'}}/>
                                             {
 
-                                                this.getUnconsumedMessagesNumber(i) !== '0' ? <></> :
+                                                chat.unreadMessages !== '0' ? <></> :
                                                     <Badge style={{backgroundColor: '#5386C9', position: "absolute"}}>
-                                                        <Text>{this.getUnconsumedMessagesNumber(channel)}</Text></Badge>
+                                                        <Text>{chat.unreadMessages}</Text></Badge>
                                             }
                                         </Left>
                                         <Body>
-                                            <Text>{this.getChannelName(channel)}</Text>
+                                            <Text>{chat.uniqueName}</Text>
                                             {
-                                                this.getUnconsumedMessagesNumber(channel) === '0' ?
+                                                chat.unreadMessages === '0' ?
                                                     <Text style={{
                                                         fontWeight: 'bold',
                                                         color: 'black'
-                                                    }}>{this.getLastMessage(channel)}</Text> :
-                                                    <Text>{this.getLastMessage(channel)}</Text>
+                                                    }}>{chat.lastMessage.body}</Text> :
+                                                    <Text>{chat.lastMessage.body}</Text>
                                             }
                                         </Body>
                                         <Right>
-                                            <Text note>{this.getLastMessageDate(channel)}</Text>
+                                            <Text note>{this.getLastMessageDate(chat.lastMessage)}</Text>
                                         </Right>
                                     </ListItem>
                                 );

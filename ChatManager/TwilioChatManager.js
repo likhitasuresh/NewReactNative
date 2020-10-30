@@ -18,6 +18,7 @@ class TwilioChatManager
         this.initializeClient();
     }
 
+    //TODO: add unConsumedLogic
     loadChannels =  () => {
         this.chatItems = [];
         this.chatClient.getUserChannelDescriptors().then((paginator) => {

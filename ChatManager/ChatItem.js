@@ -5,11 +5,24 @@ class ChatItem
         this.channel = null;
         this.lastMessage = null;
         this.messageHistory = [];
-        this.unreadMessages = null;
+        //TODO: load this too
+        this.unreadMessages = '0';
     }
 
     update = () => {
         this.lastMessage = this.messageHistory[0];
+    }
+
+    getUnconsumedState = () => {
+        if (this.unreadMessages !== 'undefined')
+        {
+            if(this.unreadMessages === '0')
+                return true;
+            else return false;
+        }
+        //TODO: handle undefined
+        else
+            return false;
     }
 
     setChannel = (channel) =>{
