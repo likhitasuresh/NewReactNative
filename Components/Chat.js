@@ -18,17 +18,15 @@ class Chat extends Component {
             search: '',
             read: null,
             newMessages: 0,
-            users: users,
             channelList: [],
-            chatManager: props.chatManager,
+            chatManager: this.props.route.params.chatManager,
             isLoading: true
         };
-        console.log(this.state.test);
-        this.state.chatManager.eventEmitter.addListener('channels-loaded',this.channelsLoadedHandler);
+        console.log(this.state.chatManager);
     }
 
     componentDidMount() {
-
+        this.state.chatManager.eventEmitter.addListener('channels-loaded',this.channelsLoadedHandler);
     }
 
     channelsLoadedHandler = () =>{
@@ -179,9 +177,7 @@ class Chat extends Component {
 
     render() {
         const { search } = this.state;
-        console.log("Manager channels length: "+this.state.chatManager.channels.length.toString());
-
-        if (!this.state.isLoading)
+        if (this.state.chatManager.isInitialized)
         {
             return (
                 <Container>
