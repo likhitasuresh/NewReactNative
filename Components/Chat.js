@@ -19,6 +19,8 @@ class Chat extends Component {
             isLoading: true
         };
         this.chatManager = this.props.route.params.chatManager;
+        //TODO: pass function  
+        //console.log(this.props.route.params.test);
     }
 
     componentDidMount() {

@@ -29,7 +29,8 @@ class Home extends React.Component {
             title="Go to Chat Activity"
             onPress={() => {this.props.navigation.navigate('Chat',
                 {
-                    chatManager: this.chatManager
+                    chatManager: new TwilioChatManager(),
+                    getMessagesFromChat: this.chatManager.getMessagesFromChat
                 });
             }}
             />
