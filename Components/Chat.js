@@ -17,7 +17,7 @@ class Chat extends Component {
         this.navigate = this.props.navigation.navigate;
         this.state = {
             search: '',
-            isLoading: true, 
+            isLoading: true,
             chatsList: []
         };
         this.chatManager = this.props.route.params.chatManager;
@@ -28,14 +28,14 @@ class Chat extends Component {
     componentDidMount() {
         this.chatManager.chatItems.forEach(item => {
             console.log(item.chatPreview.channelName)
-            
+
             this.setState({
             chatsList: this.state.chatsList.push(item.chatPreview.channelName)
         })});
         console.log(this.state.chatsList)
     }
 
-   
+
 
     channelsLoadedHandler = () =>{
         this.setState({isLoading: false});
@@ -217,10 +217,10 @@ class Chat extends Component {
                                 let chat = chatItem.chatPreview;
                                 return (
                                     <ListItem key={i} avatar onPress={() => {
-                                        // TODO pass user1 ID and user2 ID 
+                                        // TODO pass user1 ID and user2 ID
                                         let user1 = "IM79d68aeea50a4103908c9ca0ec82f146";
                                         let user2 = "IMe2f98d343dbd45aeac9ca34f7b85d2a3";
-                                        this.openDetailedChatView(chat.channelName, this.chatManager.getMessagesFromChat(chat.channelSID), user1, user2 );                                        
+                                        this.openDetailedChatView(chat.channelName, this.chatManager.getMessagesFromChat(chat.channelSID), user1, user2 );
                                     }}>
                                         <Left>
                                             <Thumbnail source={{uri: 'https://placeimg.com/140/140/any'}}/>
