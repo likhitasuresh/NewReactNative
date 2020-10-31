@@ -33,7 +33,7 @@ export default function App() {
       <Stack.Screen
         name="NewChat"
         component={NewChat}
-        options={({ route }) => ({ title: route.params.name })}
+        options={({ route }) => ({ title: route.params.channelName })}
       />
       <Stack.Screen
           name="DetailedChat"

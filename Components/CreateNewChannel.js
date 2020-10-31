@@ -7,10 +7,12 @@ class CreateNewChannel extends Component{
         this.state = {
             user: ""
         }
+        this.chatsList = this.props.route.params.chatsList;
 
     }
     validateUsername(){
         console.log(this.state.user);
+        console.log(this.chatsList);
     }
     render(){
         return(

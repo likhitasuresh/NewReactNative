@@ -20,13 +20,29 @@ class TwilioChatManager
         this.initializeClient();
     }
 
+    static create = (username) => {
+        return new Promise((resolve,reject) => {
+            resolve(new TwilioChatManager(username));
+        });
+    }
+
+    getMessagesFromChat = (channelSID) => {
+        console.log('Looking for channel: '+channelSID);
+        for(let i = 0;i < this.chatItems.length;i++) {
+            if (this.chatItems[i].channelSID === channelSID)
+                console.log('Cahnnel found');
+                return this.chatItems[i].messageHistory;
+        }
+        console.log('Channel was not found!');
+    }
+
     //TODO: add unConsumedLogic
     loadChannels =  () => {
             this.chatItems = [];
             this.chatClient.getUserChannelDescriptors().then((paginator) => {
                 Promise.all(paginator.items).then((descriptors) => {
                     let channels = [];
-                    for(let i =0;i<descriptors.length;i++)
+                    for(let i = 0;i<descriptors.length;i++)
                     {
                         this.chatItems.push(new ChatItem());
                         channels.push(descriptors[i].getChannel());
@@ -66,7 +82,6 @@ class TwilioChatManager
             result.push(this.chatItems[i].chatPreview);
         return result;
     }
-
 
     setInitializationState = (state) =>{
         this.isInitialized = state;
