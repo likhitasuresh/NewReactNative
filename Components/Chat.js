@@ -1,9 +1,10 @@
 import React, {Component} from 'react';
-import { Container, Header, Content, List, ListItem, Left, Body, Right, Thumbnail, Text, Badge } from 'native-base';
+import { Container, Header, Content, List, ListItem, Left, Body, Right, Thumbnail, Text, Badge, Button, Icon, Fab } from 'native-base';
 import { event } from 'react-native-reanimated';
 import {users} from '../Data/users';
 import { LogBox } from 'react-native';
 import TwilioChatManager from '../ChatManager/TwilioChatManager';
+import { forEach } from 'lodash';
 
 LogBox.ignoreLogs([
     'Non-serializable values were found in the navigation state',
@@ -16,7 +17,8 @@ class Chat extends Component {
         this.navigate = this.props.navigation.navigate;
         this.state = {
             search: '',
-            isLoading: true
+            isLoading: true,
+            chatsList: []
         };
         this.chatManager = this.props.route.params.chatManager;
         //TODO: pass function  
@@ -24,7 +26,16 @@ class Chat extends Component {
     }
 
     componentDidMount() {
+        this.chatManager.chatItems.forEach(item => {
+            console.log(item.chatPreview.channelName)
+
+            this.setState({
+            chatsList: this.state.chatsList.push(item.chatPreview.channelName)
+        })});
+        console.log(this.state.chatsList)
     }
+
+
 
     channelsLoadedHandler = () =>{
         this.setState({isLoading: false});
@@ -160,10 +171,12 @@ class Chat extends Component {
         this.setState({ search });
     };
 
-    openDetailedChatView = (name, messages) => {
+    openDetailedChatView = (name, messages, user1, user2) => {
         this.navigate('NewChat', {
             channelName: name,
             messages: messages,
+            user1: user1,
+            user2: user2
         });
     }
 
@@ -174,6 +187,13 @@ class Chat extends Component {
         })
     }
 
+    createNewChannel(){
+        console.log("hi hello");
+        console.log(this.state.chatsList);
+        this.navigate('CreateNewChannel', {
+            chatsList: this.state.chatsList
+        });
+    }
     static navigationOptions = {
         title: 'Chat',
         headerStyle: {
@@ -197,15 +217,14 @@ class Chat extends Component {
                                 let chat = chatItem.chatPreview;
                                 return (
                                     <ListItem key={i} avatar onPress={() => {
-                                        this.openDetailedChatView(chat.channelName, this.chatManager.getMessagesFromChat(chat.channelSID));
-                                        this.setState((state) => {
-                                            return state;
-                                        })
+                                        // TODO pass user1 ID and user2 ID
+                                        let user1 = "IM79d68aeea50a4103908c9ca0ec82f146";
+                                        let user2 = "IMe2f98d343dbd45aeac9ca34f7b85d2a3";
+                                        this.openDetailedChatView(chat.channelName, this.chatManager.getMessagesFromChat(chat.channelSID), user1, user2 );
                                     }}>
                                         <Left>
                                             <Thumbnail source={{uri: 'https://placeimg.com/140/140/any'}}/>
                                             {
-
                                                 chat.unreadMessagesCount.toString() !== '0' ? <></> :
                                                     <Badge style={{backgroundColor: '#5386C9', position: "absolute"}}>
                                                         <Text>{chat.unreadMessagesCount.toString()}</Text></Badge>
@@ -230,6 +249,14 @@ class Chat extends Component {
                             })
                         }
                     </List>
+                    <Fab
+                        active={this.state.active}
+                        direction="right"
+                        containerStyle={{ marginLeft: 10}}
+                        style={{ backgroundColor: '#5067FF' }}
+                        onPress={() => this.createNewChannel() }>
+                            <Icon name="md-person-add" />
+                    </Fab>
                 </Container>
             )}
         else

@@ -16,15 +16,20 @@ class NewChat extends Component{
     this.channel = this.params.channelName;
     this.state = {
       messages: this.params.messages,
+      user1: this.params.user1,
+      user2: this.params.user2,
     }
   }
 
   componentDidMount(){
-    console.log(this.state.messages);
+    console.log(this.state.user1);
   }
 
   onSend(messages){
     console.log('Message sent action');
+    // this.setState({
+    //   messages: this.state.messages.push(messages)
+    // })
     console.log(messages)
   }
 
@@ -65,12 +70,13 @@ class NewChat extends Component{
   }
 
   render(){
+    console.log(this.state.messages)
     return(
       <>
         <GiftedChat
             messages={this.state.messages}
             onSend={messages => this.onSend(messages)}
-            user={{_id: 1,}}
+            user={{_id: this.state.user1}}
             renderBubble={this.renderBubble}
             isTyping ={true}
             alwaysShowSend={true}
