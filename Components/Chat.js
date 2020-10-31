@@ -118,7 +118,7 @@ class Chat extends Component {
         try
         {
             //TODO: Create the date parser to make it fit neatly into the markup
-            return message.dateCreated.timestamp.toDateString();
+            return message.timestamp.toDateString();
         }
         catch (exception)
         {
