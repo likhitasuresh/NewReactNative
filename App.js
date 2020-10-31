@@ -7,6 +7,7 @@ import Home from './Components/Home';
 import Chat from './Components/Chat';
 import DetailedChat from './Components/DetailedChat';
 import  NewChat  from './Components/NewChat';
+import CreateNewChannel from './Components/CreateNewChannel';
 const Stack = createStackNavigator();
 
 export default function App() {  
@@ -38,6 +39,11 @@ export default function App() {
           name="DetailedChat"
           component={DetailedChat}
           options={{ title: "Chat" }}
+       />
+       <Stack.Screen
+          name="CreateNewChannel"
+          component={CreateNewChannel}  
+          options={{ title: "New Chat" }}        
        />
      </Stack.Navigator>
    </NavigationContainer>
