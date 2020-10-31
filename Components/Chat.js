@@ -19,14 +19,13 @@ class Chat extends Component {
             read: null,
             newMessages: 0,
             channelList: [],
-            chatManager: this.props.route.params.chatManager,
+            chatPreviews: this.props.route.params.chatPreviews,
             isLoading: true
         };
-        console.log(this.state.chatManager);
     }
 
     componentDidMount() {
-        this.state.chatManager.eventEmitter.addListener('channels-loaded',this.channelsLoadedHandler);
+
     }
 
     channelsLoadedHandler = () =>{
@@ -111,14 +110,14 @@ class Chat extends Component {
     }
 
     //TODO: what to return if no messages exist in the chat?
-    getLastMessageDate = (message) =>
+    getLastMessageDate = (date) =>
     {
         //Returns the date the last nessage in the chat was created,
         //otherwise ???
         try
         {
             //TODO: Create the date parser to make it fit neatly into the markup
-            return message.timestamp.toDateString();
+            return date.toDateString();
         }
         catch (exception)
         {
@@ -145,12 +144,11 @@ class Chat extends Component {
         this.setState({ search });
     };
 
-    openDetailedChatView = (name, messages, channel) => {
+    openDetailedChatView = (name, messages) => {
         // navigation.setParams({ title: name })
         this.navigate('NewChat', {
             name: name,
             messages: messages,
-            channel: channel,
             usersAppendMessage: (messages, i) => this.appendMessage(messages, i),
             index: i
         });
@@ -177,7 +175,7 @@ class Chat extends Component {
 
     render() {
         const { search } = this.state;
-        if (this.state.chatManager.isInitialized)
+        if (this.state.chatPreviews.length > 0)
         {
             return (
                 <Container>
@@ -192,13 +190,13 @@ class Chat extends Component {
                             //          last message text -> getLastMessage(channel)
                             //          last messgae date -> getLastMessageDate(channel)
                             //          load first batch of messages -> getMessageBatch(channel,batchSize=30)
-                            this.state.chatManager.chatItems.map((chat,i) => {
+                            this.state.chatPreviews.map((chat,i) => {
                                 return (
                                     <ListItem key={i} avatar onPress={() => {
-                                        this.openDetailedChatView(chat.channel.uniqueName, chat.messageHistory, chat.channel);
+                                        this.openDetailedChatView(chat.channelName, []);
                                         this.setState((state) => {
                                             state.users[i].read = chat.getUnconsumedState();
-                                            state.users[i].newMessages = chat.unreadMessages;
+                                            state.users[i].newMessages = chat.unreadMessagesCount;
                                             return state;
                                         })
                                     }}>
@@ -206,24 +204,24 @@ class Chat extends Component {
                                             <Thumbnail source={{uri: 'https://placeimg.com/140/140/any'}}/>
                                             {
 
-                                                chat.unreadMessages !== '0' ? <></> :
+                                                chat.unreadMessagesCount.toString() !== '0' ? <></> :
                                                     <Badge style={{backgroundColor: '#5386C9', position: "absolute"}}>
-                                                        <Text>{chat.unreadMessages}</Text></Badge>
+                                                        <Text>{chat.unreadMessagesCount.toString()}</Text></Badge>
                                             }
                                         </Left>
                                         <Body>
-                                            <Text>{chat.uniqueName}</Text>
+                                            <Text>{chat.channelName}</Text>
                                             {
-                                                chat.unreadMessages === '0' ?
+                                                chat.unreadMessagesCount.toString() === '0' ?
                                                     <Text style={{
                                                         fontWeight: 'bold',
                                                         color: 'black'
-                                                    }}>{chat.lastMessage.body}</Text> :
-                                                    <Text>{chat.lastMessage.body}</Text>
+                                                    }}>{chat.lastMessageText}</Text> :
+                                                    <Text>{chat.lastMessageText}</Text>
                                             }
                                         </Body>
                                         <Right>
-                                            <Text note>{this.getLastMessageDate(chat.lastMessage)}</Text>
+                                            <Text note>{this.getLastMessageDate(chat.lastMessageDate)}</Text>
                                         </Right>
                                     </ListItem>
                                 );

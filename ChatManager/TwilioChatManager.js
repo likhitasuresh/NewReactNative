@@ -1,6 +1,7 @@
 import {Client as TwilioChatClient} from "twilio-chat";
 import EventEmitter from "react-native-web/dist/vendor/react-native/emitter/EventEmitter";
 import ChatItem from "./ChatItem";
+import ChatPreview from "./ChatPreview";
 
 class TwilioChatManager
 {
@@ -34,11 +35,12 @@ class TwilioChatManager
                         let messageHistories = [];
                         for(let i = 0 ;i<channels.length;i++){
                             channels[i].then((channel) => {
-                                this.chatItems[i].setChannel(channel);
+                                this.chatItems[i].setChannelSID(channel.sid);
+                                this.chatItems[i].setChannelName(channel.uniqueName);
                                 messageHistories.push(channel.getMessages());
                             });
-
                         }
+
                         Promise.all(messageHistories).then(()=>{
                             for(let i = 0;i<messageHistories.length;i++){
                                 messageHistories[i].then((messageHistory) => {
@@ -56,6 +58,13 @@ class TwilioChatManager
                     });
                 });
             });
+    }
+
+    getChatPreviews = () => {
+        result = [];
+        for(let i = 0;i<this.chatItems.length;i++)
+            result.push(this.chatItems[i].chatPreview);
+        return result;
     }
 
 

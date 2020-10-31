@@ -1,22 +1,24 @@
+import ChatPreview from "./ChatPreview";
+
 class ChatItem
 {
     constructor()
     {
-        this.channel = null;
-        this.lastMessage = null;
+        this.channelSID = null;
+        this.channelName = '';
         this.messageHistory = [];
-        //TODO: load this too
-        this.unreadMessages = '0';
+        this.chatPreview = new ChatPreview();
     }
 
     update = () => {
-        this.lastMessage = this.messageHistory[0];
+        this.chatPreview.lastMessageText = this.messageHistory[0].body;
+        this.chatPreview.lastMessageDate = this.messageHistory[0].timestamp;
     }
 
     getUnconsumedState = () => {
-        if (this.unreadMessages !== 'undefined')
+        if (this.chatPreview.unreadMessagesCount !== 'undefined')
         {
-            if(this.unreadMessages === '0')
+            if(this.chatPreview.unreadMessagesCount === '0')
                 return true;
             else return false;
         }
@@ -25,20 +27,23 @@ class ChatItem
             return false;
     }
 
-    setChannel = (channel) =>{
-        this.channel = channel;
+    setChannelName = (name) => {
+        this.channelName = name;
+        this.chatPreview.channelName = name;
     }
 
-    setLastMessage = (message) => {
-        this.lastMessage = message;
+    setChannelSID = (channelSID) =>{
+        this.channelSID = channelSID;
     }
 
     setMessageHistory = (history) => {
+        //TODO: implement message wrapper and rewrite it here
         this.messageHistory = history;
     }
 
+    //TODO: rewrite to satisfy the view
     setUnreadMessages = (number) => {
-        this.unreadMessages = number;
+        this.chatPreview.unreadMessagesCount = number;
     }
 
     addBatchToHistory = (messageBatch) => {

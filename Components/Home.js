@@ -25,7 +25,7 @@ class Home extends React.Component {
             <Text style={styles.headerText} >Home Activity</Text>
             <Button
             title="Go to Chat Activity"
-            onPress={() => {this.props.navigation.navigate('Chat',{chatManager: this.chatManager});}}
+            onPress={() => {this.props.navigation.navigate('Chat',{chatPreviews: this.chatManager.getChatPreviews()});}}
             />
         </View>
         );
