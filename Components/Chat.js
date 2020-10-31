@@ -16,16 +16,12 @@ class Chat extends Component {
         this.navigate = this.props.navigation.navigate;
         this.state = {
             search: '',
-            read: null,
-            newMessages: 0,
-            channelList: [],
-            chatPreviews: this.props.route.params.chatPreviews,
             isLoading: true
         };
+        this.chatManager = this.props.route.params.chatManager;
     }
 
     componentDidMount() {
-
     }
 
     channelsLoadedHandler = () =>{
@@ -112,16 +108,34 @@ class Chat extends Component {
     //TODO: what to return if no messages exist in the chat?
     getLastMessageDate = (date) =>
     {
-        //Returns the date the last nessage in the chat was created,
-        //otherwise ???
-        try
-        {
-            //TODO: Create the date parser to make it fit neatly into the markup
-            return date.toDateString();
+        var messageDate = date.getTime();
+        var currentTime = Date.now();
+        if (messageDate >= currentTime - 604800000) {
+            try
+            {
+                return date.toDateString();
+            }
+            catch (exception) {
+                return 'Error loading';
+            }
         }
-        catch (exception)
-        {
-            return 'Error loading';
+        else if (messageDate < currentTime - 604800000) {
+            var weekday = new Array(7);
+            weekday[0] = "Sunday";
+            weekday[1] = "Monday";
+            weekday[2] = "Tuesday";
+            weekday[3] = "Wednesday";
+            weekday[4] = "Thursday";
+            weekday[5] = "Friday";
+            weekday[6] = "Saturday";
+            var onlyDate = weekday[date.getDay()]
+            try
+            {
+                return onlyDate;
+            }
+            catch (exception) {
+                return 'Error loading';
+            }
         }
     }
 
@@ -145,19 +159,15 @@ class Chat extends Component {
     };
 
     openDetailedChatView = (name, messages) => {
-        // navigation.setParams({ title: name })
         this.navigate('NewChat', {
-            name: name,
+            channelName: name,
             messages: messages,
-            usersAppendMessage: (messages, i) => this.appendMessage(messages, i),
-            index: i
         });
     }
 
     appendMessage(messages, i){
         this.setState((state) => {
             state.users[i].messages.unshift(messages);
-            // console.log(state.users[i].messages);
             return state;
         })
     }
@@ -175,28 +185,18 @@ class Chat extends Component {
 
     render() {
         const { search } = this.state;
-        if (this.state.chatPreviews.length > 0)
+        if (this.chatManager.chatItems.length > 0)
         {
             return (
                 <Container>
                     <List>
                         {
-                            //TODO: map this.state.channelsList the similar view
-                            //      pass channel to the NewChat component
-                            //      initialize the components with channel metadata:
-                            //          interlocutor name -> getInterlocutorName(channel)
-                            //          unread messages budge -> getUnconsumedMessagesNumber(channel)
-                            //          unread state -> getConsumtionState(channel)
-                            //          last message text -> getLastMessage(channel)
-                            //          last messgae date -> getLastMessageDate(channel)
-                            //          load first batch of messages -> getMessageBatch(channel,batchSize=30)
-                            this.state.chatPreviews.map((chat,i) => {
+                            this.chatManager.chatItems.map((chatItem,i) => {
+                                let chat = chatItem.chatPreview;
                                 return (
                                     <ListItem key={i} avatar onPress={() => {
-                                        this.openDetailedChatView(chat.channelName, []);
+                                        this.openDetailedChatView(chat.channelName, this.chatManager.getMessagesFromChat(chat.channelSID));
                                         this.setState((state) => {
-                                            state.users[i].read = chat.getUnconsumedState();
-                                            state.users[i].newMessages = chat.unreadMessagesCount;
                                             return state;
                                         })
                                     }}>

@@ -1,4 +1,5 @@
 import ChatPreview from "./ChatPreview";
+import MessageItem from "./MessageItem";
 
 class ChatItem
 {
@@ -11,8 +12,8 @@ class ChatItem
     }
 
     update = () => {
-        this.chatPreview.lastMessageText = this.messageHistory[0].body;
-        this.chatPreview.lastMessageDate = this.messageHistory[0].timestamp;
+        this.chatPreview.lastMessageText = this.messageHistory[0].text;
+        this.chatPreview.lastMessageDate = this.messageHistory[0].createdAt;
     }
 
     getUnconsumedState = () => {
@@ -34,11 +35,14 @@ class ChatItem
 
     setChannelSID = (channelSID) =>{
         this.channelSID = channelSID;
+        this.chatPreview.channelSid = channelSID;
     }
 
     setMessageHistory = (history) => {
-        //TODO: implement message wrapper and rewrite it here
-        this.messageHistory = history;
+        for (let i = 0; i < history.length; i++){
+            this.messageHistory.push(MessageItem.createFromTwilioMessage(history[i]));
+        }
+
     }
 
     //TODO: rewrite to satisfy the view

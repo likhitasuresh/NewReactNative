@@ -16,7 +16,9 @@ class Home extends React.Component {
 
     constructor() {
         super();
-        this.chatManager = new TwilioChatManager('louis@nuleep-user.com');
+        TwilioChatManager.create('louis@nuleep-user.com').then((manager) => {
+            this.chatManager = manager;
+        });
     }
 
     render() {
@@ -25,7 +27,11 @@ class Home extends React.Component {
             <Text style={styles.headerText} >Home Activity</Text>
             <Button
             title="Go to Chat Activity"
-            onPress={() => {this.props.navigation.navigate('Chat',{chatPreviews: this.chatManager.getChatPreviews()});}}
+            onPress={() => {this.props.navigation.navigate('Chat',
+                {
+                    chatManager: this.chatManager
+                });
+            }}
             />
         </View>
         );

@@ -2,6 +2,7 @@ class ChatPreview
 {
     constructor()
     {
+        this.channelSid = null;
         this.lastMessageText = '';
         this.lastMessageDate = null;
         this.unreadMessagesCount = '0';

@@ -20,13 +20,29 @@ class TwilioChatManager
         this.initializeClient();
     }
 
+    static create = (username) => {
+        return new Promise((resolve,reject) => {
+            resolve(new TwilioChatManager(username));
+        });
+    }
+
+    getMessagesFromChat = (channelSID) => {
+        console.log('Looking for channel: '+channelSID);
+        for(let i = 0;i < this.chatItems.length;i++) {
+            if (this.chatItems[i].channelSID === channelSID)
+                console.log('Cahnnel found');
+                return this.chatItems[i].messageHistory;
+        }
+        console.log('Channel was not found!');
+    }
+
     //TODO: add unConsumedLogic
     loadChannels =  () => {
             this.chatItems = [];
             this.chatClient.getUserChannelDescriptors().then((paginator) => {
                 Promise.all(paginator.items).then((descriptors) => {
                     let channels = [];
-                    for(let i =0;i<descriptors.length;i++)
+                    for(let i = 0;i<descriptors.length;i++)
                     {
                         this.chatItems.push(new ChatItem());
                         channels.push(descriptors[i].getChannel());
@@ -67,14 +83,13 @@ class TwilioChatManager
         return result;
     }
 
-
     setInitializationState = (state) =>{
         this.isInitialized = state;
     }
 
     fetchNewToken = () => {
         //TODO: use gql to fetch the token
-        return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzYwNjNlOGFhOWUwNDBjMTlkYWY5MTFiNzExYjY2NGY0LTE2MDQxMDc1NDYiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0MTA3NTQ2LCJleHAiOjE2MDQxMjE5NDYsImlzcyI6IlNLNjA2M2U4YWE5ZTA0MGMxOWRhZjkxMWI3MTFiNjY0ZjQiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.0ZeJNUijkgm0hP7KVMajqEs9hDDBDoTSqH14p-jviDA';
+        return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzZhZDhiZTZiZjlmYWFkNjc0Y2JhY2M5MDM4ZDI0Yzk1LTE2MDQxMjIxMDgiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0MTIyMTA4LCJleHAiOjE2MDQxMzY1MDgsImlzcyI6IlNLNmFkOGJlNmJmOWZhYWQ2NzRjYmFjYzkwMzhkMjRjOTUiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.48gmD_7liBLYnJ8xqRgImAV3MWLduUbeo9zPbQVG52E';
     };
 
     setNewToken = () => {

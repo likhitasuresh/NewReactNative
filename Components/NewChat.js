@@ -13,31 +13,19 @@ class NewChat extends Component{
   constructor(props){
     super(props);
     this.params = this.props.route.params;
-    this.channel = this.params.channel;
+    this.channel = this.params.channelName;
     this.state = {
       messages: this.params.messages,
     }
   }
 
-
   componentDidMount(){
-    // console.log(this.props.route.params)
+    console.log(this.state.messages);
   }
 
   onSend(messages){
+    console.log('Message sent action');
     console.log(messages)
-    try
-    {
-      this.channel.sendMessage(messages[0]);
-      this.params.usersAppendMessage(messages[0], this.params.index);
-      this.setState(
-          {messages: GiftedChat.append(this.state.messages, messages[0])}
-          );
-    }
-    catch (exception)
-    {
-      //TODO: add the message locally and display that is has not been sent
-    }
   }
 
   renderSend(props) {
@@ -49,6 +37,7 @@ class NewChat extends Component{
       </Send>
     );
   }
+
   renderBubble (props) {
     return (
       <Bubble
@@ -64,6 +53,7 @@ class NewChat extends Component{
       />
     )
   }
+
   parsePatterns = (_linkStyle) => {
     return [
       {
@@ -73,6 +63,7 @@ class NewChat extends Component{
       },
     ]
   }
+
   render(){
     return(
       <>
