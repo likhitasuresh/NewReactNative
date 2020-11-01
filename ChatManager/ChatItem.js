@@ -40,7 +40,7 @@ class ChatItem
 
     setMessageHistory = (history) => {
         for (let i = 0; i < history.length; i++){
-            this.messageHistory.push(MessageItem.createFromTwilioMessage(history[i]));
+            this.messageHistory.unshift(MessageItem.createFromTwilioMessage(history[i]));
         }
 
     }

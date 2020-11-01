@@ -33,7 +33,7 @@ class NewChat extends Component{
     for(let i = 0;i<messages.length;i++){
       this.sendMessageFunction(this.chatInfo.channelSID,messages[i].text);
       //TODO: listen for the event of message delivered etc.
-      this.state.messages.push(messages[i]);
+      this.state.messages.unshift(messages[i]);
       this.setState({
           messages: this.state.messages
         });

@@ -13,7 +13,7 @@ class TwilioChatManager
         this.userName = userName;
         this.eventEmitter = new EventEmitter();
         this.isInitialized = false;
-        this.messageBatchSize = 5;
+        this.messageBatchSize = 25;
 
         this.chatItems = [];
 
