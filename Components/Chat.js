@@ -20,100 +20,20 @@ class Chat extends Component {
             isLoading: true,
             chatsList: []
         };
-        this.chatManager = this.props.route.params.chatManager;
+        this.chatManagerFunctions = this.props.route.params.managerFunctions;
     }
 
     componentDidMount() {
-        this.chatManager.chatItems.forEach(item => {
-            console.log(item.chatPreview.channelName)
-
-            this.setState({
-            chatsList: this.state.chatsList.push(item.chatPreview.channelName)
-        })});
-        console.log(this.state.chatsList)
     }
-
-
 
     channelsLoadedHandler = () =>{
         this.setState({isLoading: false});
     }
 
-    getUniqueChannelName = (userEmail_a,userEmail_b) => {
-        //Creates unique chat name that contains both user names in a uniform way.
-        //uniqueName - concatenation with * of the sorted array of the user ids.
-        let user_list = [userEmail_a,userEmail_b].sort();
-        return user_list.join('*');
-    };
-
     getInterlocutorName = (channel) => {
         //Extract interlocutor userId from the channel name.
         let locutors = channel.uniqueName.split('*');
         return locutors.some((locutor) => locutor !== this.userEmail);
-    }
-
-    getConsumtionState = (channel) => {
-        //True if all the messages in the channel have been read,
-        // false otherwise.
-        try
-        {
-            let unConsumedMessages = channel.getUnconsumedMessagesCount();
-            return true;
-        }
-        catch (exception)
-        {
-            return false;
-        }
-    }
-
-    getUnconsumedMessagesNumber = (channel) => {
-        //Returns the number of unread messages in the channel.
-        try
-        {
-            console.log('Trying fetch unconsumed messages...');
-            channel.getUnconsumedMessagesCount()
-                .then((result) => {
-                    console.log('Uncosumed messages: '+result.toString());
-                    return result.toString();
-                });
-        }
-        catch (exception)
-        {
-            console.log('Could not load unconsumed messages.');
-            return '0';
-        }
-    }
-
-    getLastMessage = (channel) => {
-        //Returns the text of the last message,
-        // 'Chat is empty' otherwise.
-        try
-        {
-            let message = channel.getMessages(1).then((message) => {
-                if (message === 'undefined')
-                    return 'Empty message downloaded';
-                else
-                    return message.body;
-            });
-        }
-        catch (exception)
-        {
-            return exception.message.toString();
-        }
-    }
-
-    getChannelName = (channel) => {
-        try
-        {
-            let cname = channel.uniqueName;
-            if (cname === 'undefined')
-                return 'Error occured';
-            return cname;
-        }
-        catch (exception)
-        {
-            return 'Error occured';
-        }
     }
 
     //TODO: what to return if no messages exist in the chat?
@@ -150,31 +70,18 @@ class Chat extends Component {
         }
     }
 
-    //TODO: what if there is no messages in the channel?
-    getMessageBatch = (channel,batchSize=30) =>
-    {
-        //Loads a batch of batchSize last messages in the channel,
-        //otherwise ???
-        try
-        {
-            return channel.getMessages(batchSize).items;
-        }
-        catch (exception)
-        {
-            return '';
-        }
-    }
-
     updateSearch = (search) => {
         this.setState({ search });
     };
 
-    openDetailedChatView = (name, messages, user1, user2) => {
+    openDetailedChatView = (chatPreview, messages, user1, user2,sendFunction) => {
+
         this.navigate('NewChat', {
-            channelName: name,
+            chatPreview: chatPreview,
             messages: messages,
             user1: user1,
-            user2: user2
+            user2: user2,
+            sendMessage: sendFunction
         });
     }
 
@@ -189,7 +96,7 @@ class Chat extends Component {
         console.log("hi hello");
         console.log(this.state.chatsList);
         this.navigate('CreateNewChannel', {
-            chatsList: this.state.chatsList
+            chatsList: this.chatManagerFunctions.getChatNames
         });
     }
     static navigationOptions = {
@@ -205,20 +112,25 @@ class Chat extends Component {
 
     render() {
         const { search } = this.state;
-        if (this.chatManager.chatItems.length > 0)
+        let previews = this.chatManagerFunctions.getChatPreviews();
+        if (previews.length > 0)
         {
             return (
                 <Container>
                     <List>
                         {
-                            this.chatManager.chatItems.map((chatItem,i) => {
-                                let chat = chatItem.chatPreview;
+                            previews.map((chat,i) => {
                                 return (
                                     <ListItem key={i} avatar onPress={() => {
                                         // TODO pass user1 ID and user2 ID
-                                        let user1 = "IM79d68aeea50a4103908c9ca0ec82f146";
-                                        let user2 = "IMe2f98d343dbd45aeac9ca34f7b85d2a3";
-                                        this.openDetailedChatView(chat.channelName, this.chatManager.getMessagesFromChat(chat.channelSID), user1, user2 );
+                                        let user1 = 'louis@nuleep-user.com';
+                                        let user2 = "janesmith@nuleep-rec.com";
+                                        this.openDetailedChatView(chat,
+                                            this.chatManagerFunctions.getMessagesFromChat(chat.channelSID),
+                                            user1,
+                                            user2,
+                                            this.chatManagerFunctions.sendMessage
+                                        );
                                     }}>
                                         <Left>
                                             <Thumbnail source={{uri: 'https://placeimg.com/140/140/any'}}/>

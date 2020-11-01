@@ -13,25 +13,33 @@ class NewChat extends Component{
   constructor(props){
     super(props);
     this.params = this.props.route.params;
-    this.channel = this.params.channelName;
+    this.chatInfo = this.params.chatPreview;
+    this.channel = this.chatInfo.channelName;
+    this.sendMessageFunction = this.params.sendMessage;
     this.state = {
       messages: this.params.messages,
       user1: this.params.user1,
       user2: this.params.user2,
     }
+    console.log('Chat name: '+this.channel);
   }
 
   componentDidMount(){
-    console.log(this.state.user1);
+    //console.log(this.state.user1);
+    console.log(this.chatInfo);
   }
 
   onSend(messages){
-    console.log('Message sent action');
-    // this.setState({
-    //   messages: this.state.messages.push(messages)
-    // })
-    console.log(messages)
-  }
+    for(let i = 0;i<messages.length;i++){
+      this.sendMessageFunction(this.chatInfo.channelSID,messages[i].text);
+      //TODO: listen for the event of message delivered etc.
+      this.state.messages.push(messages[i]);
+      this.setState({
+          messages: this.state.messages
+        });
+      }
+    }
+
 
   renderSend(props) {
     return (

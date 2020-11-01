@@ -10,16 +10,18 @@ class CreateNewChannel extends Component{
         this.chatsList = this.props.route.params.chatsList;
 
     }
+
     validateUsername(){
         console.log(this.state.user);
         console.log(this.chatsList);
     }
+
     render(){
         return(
             <Container>
                 <Content>
                     <InputGroup borderType='rounded' >
-                        <Input 
+                        <Input
                             placeholder='Enter Username'
                             name="user"
                             onChangeText = {(user) => this.setState({ user: user})}/>
@@ -27,7 +29,7 @@ class CreateNewChannel extends Component{
                             <Icon name='ios-search' />
                         </Button>
                     </InputGroup>
-                    
+
                 </Content>
             </Container>
         )

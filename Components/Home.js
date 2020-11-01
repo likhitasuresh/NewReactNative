@@ -16,7 +16,9 @@ class Home extends React.Component {
 
     constructor() {
         super();
-        TwilioChatManager.create('louis@nuleep-user.com').then((manager) => {
+        let luis = 'louis@nuleep-user.com';
+        let jane = "janesmith@nuleep-rec.com";
+        TwilioChatManager.create(luis).then((manager) => {
             this.chatManager = manager;
         });
     }
@@ -29,7 +31,13 @@ class Home extends React.Component {
             title="Go to Chat Activity"
             onPress={() => {this.props.navigation.navigate('Chat',
                 {
-                    chatManager: this.chatManager
+                    chatManager: this.chatManager,
+                    managerFunctions: {
+                        getMessagesFromChat: this.chatManager.getMessagesFromChat,
+                        getChatPreviews: this.chatManager.getChatPreviews,
+                        getChatNames: this.chatManager.getChatNames,
+                        sendMessage: this.chatManager.sendMessage
+                    }
                 });
             }}
             />

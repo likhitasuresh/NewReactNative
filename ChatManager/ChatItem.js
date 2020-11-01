@@ -35,7 +35,7 @@ class ChatItem
 
     setChannelSID = (channelSID) =>{
         this.channelSID = channelSID;
-        this.chatPreview.channelSid = channelSID;
+        this.chatPreview.channelSID = channelSID;
     }
 
     setMessageHistory = (history) => {

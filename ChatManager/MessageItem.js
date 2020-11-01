@@ -8,8 +8,10 @@ class MessageItem
         let newMessage = {
             _id: twilioMessage.sid,
             text: twilioMessage.body,
-            user: twilioMessage.author,
-            createdAt: twilioMessage.timestamp
+            createdAt: twilioMessage.timestamp,
+            user: {
+                _id: twilioMessage.author
+            },
         };
 
         return newMessage;
