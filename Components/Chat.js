@@ -127,8 +127,8 @@ class Chat extends Component {
                                         let user2 = "janesmith@nuleep-rec.com";
                                         this.openDetailedChatView(chat,
                                             this.chatManagerFunctions.getMessagesFromChat(chat.channelSID),
-                                            user1,
-                                            user2,
+                                            chat.currentUser,
+                                            chat.interlocutor,
                                             this.chatManagerFunctions.sendMessage
                                         );
                                     }}>

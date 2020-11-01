@@ -68,6 +68,14 @@ class TwilioChatManager
                             }
                         });
 
+                        Promise.all(channelUsersPromises).done(()=>{
+                            for(let i = 0;i<channelUsersPromises.length;i++){
+                                channelUsersPromises[i].then((channelMembers) => {
+                                    this.chatItems[i].chatPreview.setMembers(channelMembers,this.userName);
+                                });
+                            }
+                        });
+
                         console.log(this.chatItems);
                         this.setInitializationState(true);
                         this.eventEmitter.emit('channels-loaded', {});
@@ -86,11 +94,8 @@ class TwilioChatManager
     /*---------------------- GETTERS --------------------------*/
 
     getMessagesFromChat = (channelSID) => {
-        console.log('!!!Looking for channel: '+channelSID);
         for(let i = 0;i < this.chatItems.length;i++) {
-            console.log('Current channel SID: '+this.chatItems[i].channelSID);
             if (this.chatItems[i].channelSID === channelSID){
-                console.log('Cahnnel found');
                 return this.chatItems[i].messageHistory;
             }
         }
@@ -109,6 +114,14 @@ class TwilioChatManager
         for(let i = 0;i<this.chatItems.length;i++)
             result.push(this.chatItems[i].channelName);
         return result;
+    }
+
+    getChannelBySID = (channelSID) => {
+        for(let i = 0;i<this.channels.length;i++){
+            if (this.channels[i].sid === channelSID){
+                return this.channels[i].channel;
+            }
+        }
     }
 
 
@@ -133,7 +146,7 @@ class TwilioChatManager
     fetchNewToken = () => {
         //TODO: use gql to fetch the token
         if (this.userName == 'louis@nuleep-user.com')
-            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzEzOTRkNzQwYzRkMjU5MjA1OWIyNmFjYWUzZWZhMjAyLTE2MDQyMTM3MDciLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0MjEzNzA3LCJleHAiOjE2MDQyMjgxMDcsImlzcyI6IlNLMTM5NGQ3NDBjNGQyNTkyMDU5YjI2YWNhZTNlZmEyMDIiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.2xvXwejHaEZBvcHHrHHXuphiq6eIugBhL3tXrZ5myFc';
+            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTS2YwZDRkYTliNTIxMjkxMTVjNzQ3MjY0MGM1ZDJhMjM1LTE2MDQyNzA0MzMiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0MjcwNDMzLCJleHAiOjE2MDQyODQ4MzMsImlzcyI6IlNLZjBkNGRhOWI1MjEyOTExNWM3NDcyNjQwYzVkMmEyMzUiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.EGbYE0Mbi8M2RStSjHuPSNpdT4eXdyMO9S_xWg19h_0';
         else if (this.userName === 'janesmith@nuleep-rec.com')
             return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTS2RjYmI3YjEwZTdhNTViN2ZlZDI0ZDFlMDgwNzUyNmZhLTE2MDQyMDU0OTgiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJqYW5lc21pdGhAbnVsZWVwLXJlYy5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0MjA1NDk4LCJleHAiOjE2MDQyMTk4OTgsImlzcyI6IlNLZGNiYjdiMTBlN2E1NWI3ZmVkMjRkMWUwODA3NTI2ZmEiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.eOqplU7NnAWgJRJxE8UxkElIoGO0v-queKHiPnsdHT0';
     };

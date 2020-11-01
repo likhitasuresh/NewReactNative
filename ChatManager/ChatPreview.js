@@ -7,18 +7,21 @@ class ChatPreview
         this.lastMessageDate = null;
         this.unreadMessagesCount = '0';
         this.channelName = '';
+
+        this.currentUser = '';
+        this.interlocutor = '';
     }
 
-    getUnconsumedState = () => {
-        if (this.unreadMessagesCount !== 'undefined')
-        {
-            if(this.unreadMessagesCount === '0')
-                return true;
-            else return false;
+    setMembers = (membersList,currentUser) => {
+        console.log('I got here, user name: '+currentUser);
+
+        this.currentUser = currentUser;
+        for (let i = 0;i<membersList.length;i++){
+            if(membersList[i].identity !== currentUser){
+                this.interlocutor = membersList[i].identity;
+                console.log('Adding '+this.interlocutor);
+            }
         }
-        //TODO: handle undefined
-        else
-            return false;
     }
 }
 

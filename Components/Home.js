@@ -36,7 +36,8 @@ class Home extends React.Component {
                         getMessagesFromChat: this.chatManager.getMessagesFromChat,
                         getChatPreviews: this.chatManager.getChatPreviews,
                         getChatNames: this.chatManager.getChatNames,
-                        sendMessage: this.chatManager.sendMessage
+                        sendMessage: this.chatManager.sendMessage,
+                        getChannelBySID: this.chatManager.getChannelBySID
                     }
                 });
             }}

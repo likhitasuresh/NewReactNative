@@ -9,9 +9,6 @@ class ChatItem
         this.channelName = '';
         this.messageHistory = [];
         this.chatPreview = new ChatPreview();
-
-        this.currentUser = '';
-        this.interlocutor = '';
     }
 
     update = () => {
