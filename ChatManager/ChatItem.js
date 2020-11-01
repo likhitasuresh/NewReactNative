@@ -9,6 +9,9 @@ class ChatItem
         this.channelName = '';
         this.messageHistory = [];
         this.chatPreview = new ChatPreview();
+
+        this.currentUser = '';
+        this.interlocutor = '';
     }
 
     update = () => {
@@ -42,7 +45,17 @@ class ChatItem
         for (let i = 0; i < history.length; i++){
             this.messageHistory.unshift(MessageItem.createFromTwilioMessage(history[i]));
         }
+    }
 
+    setFromTwilioUsers = (users,currentUser) => {
+        console.log(users);
+        this.currentUser = currentUser;
+        for(let i = 0;i<users.length;i++){
+            if(users[i].identity !== currentUser){
+                this.interlocutor = users[i];
+                return
+            }
+        }
     }
 
     //TODO: rewrite to satisfy the view

@@ -2,6 +2,7 @@ import {Client as TwilioChatClient} from "twilio-chat";
 import EventEmitter from "react-native-web/dist/vendor/react-native/emitter/EventEmitter";
 import ChatItem from "./ChatItem";
 import ChatPreview from "./ChatPreview";
+import ChannelItem from "./ChanneItem";
 
 class TwilioChatManager
 {
@@ -16,6 +17,7 @@ class TwilioChatManager
         this.messageBatchSize = 25;
 
         this.chatItems = [];
+        this.channels = [];
 
         this.setNewToken();
         this.initializeClient();
@@ -42,15 +44,20 @@ class TwilioChatManager
 
                     Promise.all(channels).then(() => {
                         let messageHistories = [];
+                        let channelUsersPromises = [];
+
                         for(let i = 0 ;i<channels.length;i++){
                             channels[i].then((channel) => {
+                                this.channels.push(ChannelItem.createFromTwilioChannel(channel));
                                 this.chatItems[i].setChannelSID(channel.sid);
                                 this.chatItems[i].setChannelName(channel.uniqueName);
+
                                 messageHistories.push(channel.getMessages(this.messageBatchSize));
+                                channelUsersPromises.push(channel.getMembers());
                             });
                         }
 
-                        Promise.all(messageHistories).then(()=>{
+                       Promise.all(messageHistories).then(()=>{
                             for(let i = 0;i<messageHistories.length;i++){
                                 messageHistories[i].then((messageHistory) => {
                                     Promise.all(messageHistory.items).then((messages) => {
@@ -58,9 +65,9 @@ class TwilioChatManager
                                         this.chatItems[i].update();
                                     });
                                 });
-
                             }
                         });
+
                         console.log(this.chatItems);
                         this.setInitializationState(true);
                         this.eventEmitter.emit('channels-loaded', {});
@@ -126,7 +133,7 @@ class TwilioChatManager
     fetchNewToken = () => {
         //TODO: use gql to fetch the token
         if (this.userName == 'louis@nuleep-user.com')
-            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTS2RhM2NkNzRhMTYwNGJhNzM3NDY2ZTRjMzA5MjM4NGU2LTE2MDQxOTc1OTEiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0MTk3NTkxLCJleHAiOjE2MDQyMTE5OTEsImlzcyI6IlNLZGEzY2Q3NGExNjA0YmE3Mzc0NjZlNGMzMDkyMzg0ZTYiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.W8KLF-ib4l7Yx_yc1xkogCA28hXcaxv3ThlQoOsEhSI';
+            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzEzOTRkNzQwYzRkMjU5MjA1OWIyNmFjYWUzZWZhMjAyLTE2MDQyMTM3MDciLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0MjEzNzA3LCJleHAiOjE2MDQyMjgxMDcsImlzcyI6IlNLMTM5NGQ3NDBjNGQyNTkyMDU5YjI2YWNhZTNlZmEyMDIiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.2xvXwejHaEZBvcHHrHHXuphiq6eIugBhL3tXrZ5myFc';
         else if (this.userName === 'janesmith@nuleep-rec.com')
             return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTS2RjYmI3YjEwZTdhNTViN2ZlZDI0ZDFlMDgwNzUyNmZhLTE2MDQyMDU0OTgiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJqYW5lc21pdGhAbnVsZWVwLXJlYy5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0MjA1NDk4LCJleHAiOjE2MDQyMTk4OTgsImlzcyI6IlNLZGNiYjdiMTBlN2E1NWI3ZmVkMjRkMWUwODA3NTI2ZmEiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.eOqplU7NnAWgJRJxE8UxkElIoGO0v-queKHiPnsdHT0';
     };
