@@ -31,7 +31,9 @@ class NewChat extends Component{
   onSend(messages){
     console.log(this.state.messages);
     for(let i = 0;i<messages.length;i++){
-      this.sendMessageFunction(this.chatInfo.channelSID,messages[i].text,this.state.messages[0].index+1);
+      //TODO: reset index once udate event pushed successfully
+      messages[i].index = this.state.messages[0].index+1;
+      this.sendMessageFunction(this.chatInfo.channelSID,messages[i].text,messages[i].index);
       //TODO: listen for the event of message delivered etc.
       this.state.messages.unshift(messages[i]);
       console.log('Pushed message: ');
@@ -40,6 +42,7 @@ class NewChat extends Component{
           messages: this.state.messages
         });
       }
+    console.log(this.state.messages);
     }
 
 

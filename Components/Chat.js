@@ -99,6 +99,20 @@ class Chat extends Component {
             chatsList: this.chatManagerFunctions.getChatNames
         });
     }
+
+    displayMessage = (message,messageLength=50) => {
+        if(message.length > messageLength){
+            let truncatedMessage = message.slice(0,messageLength-3);
+            truncatedMessage+='...';
+            return truncatedMessage;
+        }
+        else
+        {
+            return message;
+        }
+
+    }
+
     static navigationOptions = {
         title: 'Chat',
         headerStyle: {
@@ -139,14 +153,14 @@ class Chat extends Component {
                                             }
                                         </Left>
                                         <Body>
-                                            <Text>{chat.channelName}</Text>
+                                            <Text>{chat.interlocutor}</Text>
                                             {
                                                 chat.unreadMessagesCount.toString() === '0' ?
                                                     <Text style={{
                                                         fontWeight: 'bold',
                                                         color: 'black'
-                                                    }}>{chat.lastMessageText}</Text> :
-                                                    <Text>{chat.lastMessageText}</Text>
+                                                    }}>{this.displayMessage(chat.lastMessageText)}</Text> :
+                                                    <Text>{this.displayMessage(chat.lastMessageText)}</Text>
                                             }
                                         </Body>
                                         <Right>
