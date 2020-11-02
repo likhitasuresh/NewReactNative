@@ -16,8 +16,6 @@ class ChatPreview
     }
 
     setMembers = (membersList,currentUser) => {
-        console.log('I got here, user name: '+currentUser);
-
         this.currentUser = currentUser;
         for (let i = 0;i<membersList.length;i++){
             if(membersList[i].identity !== currentUser){

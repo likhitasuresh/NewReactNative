@@ -145,19 +145,30 @@ class TwilioChatManager
 
     fetchNewToken = () => {
         //TODO: use gql to fetch the token
-        if (this.userName == 'louis@nuleep-user.com')
+        if (this.userName === 'louis@nuleep-user.com')
             return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTS2YwZDRkYTliNTIxMjkxMTVjNzQ3MjY0MGM1ZDJhMjM1LTE2MDQyNzA0MzMiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0MjcwNDMzLCJleHAiOjE2MDQyODQ4MzMsImlzcyI6IlNLZjBkNGRhOWI1MjEyOTExNWM3NDcyNjQwYzVkMmEyMzUiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.EGbYE0Mbi8M2RStSjHuPSNpdT4eXdyMO9S_xWg19h_0';
         else if (this.userName === 'janesmith@nuleep-rec.com')
-            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTS2RjYmI3YjEwZTdhNTViN2ZlZDI0ZDFlMDgwNzUyNmZhLTE2MDQyMDU0OTgiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJqYW5lc21pdGhAbnVsZWVwLXJlYy5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0MjA1NDk4LCJleHAiOjE2MDQyMTk4OTgsImlzcyI6IlNLZGNiYjdiMTBlN2E1NWI3ZmVkMjRkMWUwODA3NTI2ZmEiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.eOqplU7NnAWgJRJxE8UxkElIoGO0v-queKHiPnsdHT0';
+            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzYwMjQzMzY0ZWFlYmRlMjNkZjgyMmQ3NTBhZjFiNWQwLTE2MDQyODE3ODAiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJqYW5lc21pdGhAbnVsZWVwLXJlYy5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0MjgxNzgwLCJleHAiOjE2MDQyOTYxODAsImlzcyI6IlNLNjAyNDMzNjRlYWViZGUyM2RmODIyZDc1MGFmMWI1ZDAiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.aOlWs86Cg3uLs3NB9InClHjcAc9kWq0zZcwk9uutNoc';
     };
 
-    sendMessage = (channelSID,message) => {
-        console.log('Message sending is turned off');
+    sendMessage = (channelSID,message,messageIndex) => {
         this.chatClient.getChannelBySid(channelSID).then((channel) => {
             channel.sendMessage(message).then((result) => {
                 console.log('Trying send: '+message);
                 if (typeof result === 'number'){
                     //TODO: shoot success event
+                    console.log('Setting last message index: '+messageIndex.toString());
+                    channel.updateLastConsumedMessageIndex(messageIndex).then((result) => {
+                        //Update the channel info: last message
+                        //set last consumed index to result
+                        for(let i = 0;i < this.chatItems.length;i++){
+                            if(this.chatItems[i].channelSID === channelSID){
+                                this.chatItems[i].update();
+                                console.log('Updated index: ');
+                                console.log(messageIndex);
+                            }
+                        }
+                    });
                 }
                 //TODO: check
                 // if result is number -> number is index of the new message

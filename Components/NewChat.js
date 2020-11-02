@@ -21,6 +21,7 @@ class NewChat extends Component{
       user1: this.params.user1,
       user2: this.params.user2,
     }
+    console.log('Last message index is: '+this.state.messages[0].index);
   }
 
   componentDidMount(){
@@ -28,10 +29,13 @@ class NewChat extends Component{
   }
 
   onSend(messages){
+    console.log(this.state.messages);
     for(let i = 0;i<messages.length;i++){
-      this.sendMessageFunction(this.chatInfo.channelSID,messages[i].text);
+      this.sendMessageFunction(this.chatInfo.channelSID,messages[i].text,this.state.messages[0].index+1);
       //TODO: listen for the event of message delivered etc.
       this.state.messages.unshift(messages[i]);
+      console.log('Pushed message: ');
+      console.log(messages[i]);
       this.setState({
           messages: this.state.messages
         });
