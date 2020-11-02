@@ -21,12 +21,10 @@ class NewChat extends Component{
       user1: this.params.user1,
       user2: this.params.user2,
     }
-    console.log('Chat name: '+this.channel);
   }
 
   componentDidMount(){
     //console.log(this.state.user1);
-    console.log(this.chatInfo);
   }
 
   onSend(messages){
@@ -78,7 +76,6 @@ class NewChat extends Component{
   }
 
   render(){
-    console.log(this.state.messages)
     return(
       <>
         <GiftedChat

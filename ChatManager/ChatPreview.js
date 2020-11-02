@@ -10,6 +10,9 @@ class ChatPreview
 
         this.currentUser = '';
         this.interlocutor = '';
+
+        this.currentUserSID = '';
+        this.interlocuterSID = '';
     }
 
     setMembers = (membersList,currentUser) => {
@@ -19,7 +22,10 @@ class ChatPreview
         for (let i = 0;i<membersList.length;i++){
             if(membersList[i].identity !== currentUser){
                 this.interlocutor = membersList[i].identity;
-                console.log('Adding '+this.interlocutor);
+                this.interlocuterSID = membersList[i].sid;
+            }
+            else {
+                this.currentUserSID = membersList[i].sid;
             }
         }
     }

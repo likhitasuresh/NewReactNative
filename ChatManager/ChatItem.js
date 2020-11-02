@@ -45,7 +45,6 @@ class ChatItem
     }
 
     setFromTwilioUsers = (users,currentUser) => {
-        console.log(users);
         this.currentUser = currentUser;
         for(let i = 0;i<users.length;i++){
             if(users[i].identity !== currentUser){

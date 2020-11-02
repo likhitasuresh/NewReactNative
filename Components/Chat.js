@@ -59,7 +59,7 @@ class Chat extends Component {
             weekday[4] = "Thursday";
             weekday[5] = "Friday";
             weekday[6] = "Saturday";
-            var onlyDate = weekday[date.getDay()]
+            var onlyDate = weekday[date.getDay()];
             try
             {
                 return onlyDate;
@@ -123,8 +123,6 @@ class Chat extends Component {
                                 return (
                                     <ListItem key={i} avatar onPress={() => {
                                         // TODO pass user1 ID and user2 ID
-                                        let user1 = 'louis@nuleep-user.com';
-                                        let user2 = "janesmith@nuleep-rec.com";
                                         this.openDetailedChatView(chat,
                                             this.chatManagerFunctions.getMessagesFromChat(chat.channelSID),
                                             chat.currentUser,
