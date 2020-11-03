@@ -27,6 +27,10 @@ class ChatPreview
             }
         }
     }
+
+    setUnconsumedMessageCountZero = () =>{
+        this.unreadMessagesCount = '0';
+    }
 }
 
 export default ChatPreview;

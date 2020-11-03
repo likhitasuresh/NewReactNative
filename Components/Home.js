@@ -18,7 +18,7 @@ class Home extends React.Component {
         super();
         let luis = 'louis@nuleep-user.com';
         let jane = "janesmith@nuleep-rec.com";
-        TwilioChatManager.create(jane).then((manager) => {
+        TwilioChatManager.create(luis).then((manager) => {
             this.chatManager = manager;
         });
     }
@@ -37,7 +37,10 @@ class Home extends React.Component {
                         getChatPreviews: this.chatManager.getChatPreviews,
                         getChatNames: this.chatManager.getChatNames,
                         sendMessage: this.chatManager.sendMessage,
-                        getChannelBySID: this.chatManager.getChannelBySID
+                        getChannelBySID: this.chatManager.getChannelBySID,
+                        setAllMessagesConsumed: this.chatManager.setAllMessagesConsumed,
+                        subscribeForChannelEvent: this.chatManager.subscribeForChannelEvent,
+                        ingestNewMessage: this.chatManager.ingestNewMessage
                     }
                 });
             }}

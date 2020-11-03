@@ -36,22 +36,25 @@ class Chat extends Component {
         return locutors.some((locutor) => locutor !== this.userEmail);
     }
 
-    //TODO: what to return if no messages exist in the chat?
+    isToday = (someDate) => {
+        const today = new Date()
+        return someDate.getDate() === today.getDate() &&
+            someDate.getMonth() === today.getMonth() &&
+            someDate.getFullYear() === today.getFullYear();
+    }
+
     getLastMessageDate = (date) =>
     {
-        var messageDate = date.getTime();
-        var currentTime = Date.now();
-        if (messageDate >= currentTime - 604800000) {
-            try
-            {
-                return date.toDateString();
-            }
-            catch (exception) {
-                return 'Error loading';
-            }
+        let messageDate = date.getTime();
+        let currentTime = Date.now();
+
+        if (this.isToday(date)) {
+            let timeString = ('0'+date.getHours()).slice(-2)+':'+
+                ('0'+date.getMinutes()).slice(-2);
+            return timeString;
         }
         else if (messageDate < currentTime - 604800000) {
-            var weekday = new Array(7);
+            let weekday = new Array(7);
             weekday[0] = "Sunday";
             weekday[1] = "Monday";
             weekday[2] = "Tuesday";
@@ -59,7 +62,7 @@ class Chat extends Component {
             weekday[4] = "Thursday";
             weekday[5] = "Friday";
             weekday[6] = "Saturday";
-            var onlyDate = weekday[date.getDay()];
+            let onlyDate = weekday[date.getDay()];
             try
             {
                 return onlyDate;
@@ -68,20 +71,37 @@ class Chat extends Component {
                 return 'Error loading';
             }
         }
+        else
+        {
+            return date.toDateString();
+        }
     }
 
     updateSearch = (search) => {
         this.setState({ search });
     };
 
-    openDetailedChatView = (chatPreview, messages, user1, user2,sendFunction) => {
+    openDetailedChatView = (chatPreview,
+                            messages,
+                            user1,
+                            user2,
+                            sendFunction,
+                            unconsumedIndexUpdateFunction,
+                            subscribeForEventFunc,
+                            getChannelBySID,
+                            ingestNewMessage
+                            ) => {
 
         this.navigate('NewChat', {
             chatPreview: chatPreview,
             messages: messages,
             user1: user1,
             user2: user2,
-            sendMessage: sendFunction
+            sendMessage: sendFunction,
+            setAllMessagesConsumed: unconsumedIndexUpdateFunction,
+            subscribeForChannelEvent: subscribeForEventFunc,
+            getChannelBySID: getChannelBySID,
+            ingestNewMessage: ingestNewMessage
         });
     }
 
@@ -141,30 +161,38 @@ class Chat extends Component {
                                             this.chatManagerFunctions.getMessagesFromChat(chat.channelSID),
                                             chat.currentUser,
                                             chat.interlocutor,
-                                            this.chatManagerFunctions.sendMessage
+                                            this.chatManagerFunctions.sendMessage,
+                                            this.chatManagerFunctions.setAllMessagesConsumed,
+                                            this.chatManagerFunctions.subscribeForChannelEvent,
+                                            this.chatManagerFunctions.getChannelBySID,
+                                            this.chatManagerFunctions.ingestNewMessage
                                         );
+                                    }} style={{
+                                        minHeight: 35
                                     }}>
                                         <Left>
                                             <Thumbnail source={{uri: 'https://placeimg.com/140/140/any'}}/>
                                             {
-                                                chat.unreadMessagesCount.toString() !== '0' ? <></> :
+                                                chat.unreadMessagesCount.toString() === '0' ? <></> :
                                                     <Badge style={{backgroundColor: '#5386C9', position: "absolute"}}>
                                                         <Text>{chat.unreadMessagesCount.toString()}</Text></Badge>
                                             }
                                         </Left>
                                         <Body>
-                                            <Text>{chat.interlocutor}</Text>
+                                            <Text style={{minHeight: 30}}>{chat.interlocutor}</Text>
                                             {
-                                                chat.unreadMessagesCount.toString() === '0' ?
+                                                chat.unreadMessagesCount.toString() !== '0' ?
                                                     <Text style={{
                                                         fontWeight: 'bold',
-                                                        color: 'black'
+                                                        color: 'black',
+                                                        minHeight: 35,
+                                                        maxHeight: 45
                                                     }}>{this.displayMessage(chat.lastMessageText)}</Text> :
                                                     <Text>{this.displayMessage(chat.lastMessageText)}</Text>
                                             }
                                         </Body>
                                         <Right>
-                                            <Text note>{this.getLastMessageDate(chat.lastMessageDate)}</Text>
+                                            <Text style={{}} note>{this.getLastMessageDate(chat.lastMessageDate)}</Text>
                                         </Right>
                                     </ListItem>
                                 );

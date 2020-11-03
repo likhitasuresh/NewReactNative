@@ -3,6 +3,7 @@ import EventEmitter from "react-native-web/dist/vendor/react-native/emitter/Even
 import ChatItem from "./ChatItem";
 import ChatPreview from "./ChatPreview";
 import ChannelItem from "./ChanneItem";
+import MessageItem from "./MessageItem";
 
 class TwilioChatManager
 {
@@ -45,6 +46,7 @@ class TwilioChatManager
                     Promise.all(channels).then(() => {
                         let messageHistories = [];
                         let channelUsersPromises = [];
+                        let unreadMessageCountPromises = [];
 
                         for(let i = 0 ;i<channels.length;i++){
                             channels[i].then((channel) => {
@@ -54,6 +56,7 @@ class TwilioChatManager
 
                                 messageHistories.push(channel.getMessages(this.messageBatchSize));
                                 channelUsersPromises.push(channel.getMembers());
+                                unreadMessageCountPromises.push(channel.getUnconsumedMessagesCount());
                             });
                         }
 
@@ -76,10 +79,25 @@ class TwilioChatManager
                             }
                         });
 
-                        console.log(this.chatItems);
-                        this.setInitializationState(true);
-                        this.eventEmitter.emit('channels-loaded', {});
+                        Promise.all(unreadMessageCountPromises).then(()=>{
+                           for(let i = 0;i<unreadMessageCountPromises.length;i++){
+                               unreadMessageCountPromises[i].then((number) =>{
+                                   //console.log('Unconsumed: ');
+                                   //console.log(number);
+
+                                   if (typeof number === 'number')
+                                       this.chatItems[i].chatPreview.unreadMessagesCount = number.toString();
+                                   else
+                                   {
+                                       //TODO: handle this error
+                                       this.chatItems[i].chatPreview.unreadMessagesCount = '0';
+                                   }
+                               });
+                           }
+                        });
                     });
+                    this.setInitializationState(true);
+                    //console.log('Even should shoot now:');
                 });
             });
     }
@@ -103,9 +121,11 @@ class TwilioChatManager
     }
 
     getChatPreviews = () => {
-        result = [];
+        let result = [];
         for(let i = 0;i<this.chatItems.length;i++)
             result.push(this.chatItems[i].chatPreview);
+        if(result.length >= 2)
+            return result.sort(this.initialChatItemsSort);
         return result;
     }
 
@@ -118,12 +138,11 @@ class TwilioChatManager
 
     getChannelBySID = (channelSID) => {
         for(let i = 0;i<this.channels.length;i++){
-            if (this.channels[i].sid === channelSID){
+            if (this.channels[i].channel.sid === channelSID){
                 return this.channels[i].channel;
             }
         }
     }
-
 
     /*---------------------- SETTERS --------------------*/
 
@@ -135,7 +154,44 @@ class TwilioChatManager
         this.accessToken = this.fetchNewToken();
     };
 
+    setAllMessagesConsumed = (channelSID,lastMessageIndex) =>{
+        for(let i = 0;i<this.channels.length;i++){
+            if(this.channels[i].channelSID === channelSID){
+                this.channels[i].channel.updateLastConsumedMessageIndex(lastMessageIndex).then((number) => {
+                    if (typeof number === 'number'){
+                        // Successfull update
+                    }
+                    else
+                    {
+                        console.log('Error in Managed::setALlMessagesConsumed');
+                    }
+                })
+            }
+        }
+    }
+
+
+
     /*---------------------- AUXILLARY --------------------*/
+
+    subscribeForChannelEvent(channelSID,event,callback){
+        console.log('Got to subscribe');
+        console.log(callback);
+        let channel = this.getChannelBySID(channelSID);
+        channel.on(event,callback);
+    }
+
+    ingestNewMessage = (channelSID,message,history) => {
+        if(message.author !== this.userName){
+            console.log('New message is not by author.');
+
+            let messageItem = MessageItem.createFromTwilioMessage(message);
+            this.setAllMessagesConsumed(channelSID,messageItem.index);
+            history.unshift(messageItem);
+            return true;
+        }
+        return false;
+    }
 
     refreshToken = (options={}) => {
         //TODO: checks on each of the steps needed.
@@ -144,28 +200,31 @@ class TwilioChatManager
     };
 
     fetchNewToken = () => {
-        //TODO: use gql to fetch the token
         if (this.userName === 'louis@nuleep-user.com')
-            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTS2YwZDRkYTliNTIxMjkxMTVjNzQ3MjY0MGM1ZDJhMjM1LTE2MDQyNzA0MzMiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0MjcwNDMzLCJleHAiOjE2MDQyODQ4MzMsImlzcyI6IlNLZjBkNGRhOWI1MjEyOTExNWM3NDcyNjQwYzVkMmEyMzUiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.EGbYE0Mbi8M2RStSjHuPSNpdT4eXdyMO9S_xWg19h_0';
+            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzBmODI0NTYxMGVjMzU0Zjk3MTE3ODc0NTMyMTFlNTQzLTE2MDQzNjQ3MDciLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0MzY0NzA3LCJleHAiOjE2MDQzNzkxMDcsImlzcyI6IlNLMGY4MjQ1NjEwZWMzNTRmOTcxMTc4NzQ1MzIxMWU1NDMiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.BEALK-42tUVBvweYNAVAyR1atkByA2drgZOTYNbAviw';
         else if (this.userName === 'janesmith@nuleep-rec.com')
-            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTS2E3MWViOGNkMDdmY2E3MGY2NDBhOWMyY2Q1NjQ1MDNiLTE2MDQzNDIzNjQiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJqYW5lc21pdGhAbnVsZWVwLXJlYy5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0MzQyMzY0LCJleHAiOjE2MDQzNTY3NjQsImlzcyI6IlNLYTcxZWI4Y2QwN2ZjYTcwZjY0MGE5YzJjZDU2NDUwM2IiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.G-cEO25twnsUTPNFm4hiYJ_8lr07fY_tLlMpcAfLQ_Q';
+            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzhiMWRjMTc3NTBiZDcwMGNlNDI1MTY4ZTliNGUxOWQxLTE2MDQzNjAzOTYiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJqYW5lc21pdGhAbnVsZWVwLXJlYy5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0MzYwMzk2LCJleHAiOjE2MDQzNzQ3OTYsImlzcyI6IlNLOGIxZGMxNzc1MGJkNzAwY2U0MjUxNjhlOWI0ZTE5ZDEiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.YWDWZhFOcNCUTn9HwtldADXvsCcPQASiVkXuP8LTdfg';
     };
+
+    initialChatItemsSort = (chatItemA,chatItemB) => {
+        return chatItemB.lastMessageDate - chatItemA.lastMessageDate;
+    }
 
     sendMessage = (channelSID,message,messageIndex) => {
         this.chatClient.getChannelBySid(channelSID).then((channel) => {
             channel.sendMessage(message).then((result) => {
-                console.log('Trying send: '+message);
+                //console.log('Trying send: '+message);
                 if (typeof result === 'number'){
                     //TODO: shoot success event
-                    console.log('Setting last message index: '+messageIndex.toString());
+                    //console.log('Setting last message index: '+messageIndex.toString());
                     channel.updateLastConsumedMessageIndex(messageIndex).then((result) => {
                         //Update the channel info: last message
                         //set last consumed index to result
                         for(let i = 0;i < this.chatItems.length;i++){
                             if(this.chatItems[i].channelSID === channelSID){
                                 this.chatItems[i].update();
-                                console.log('Updated index: ');
-                                console.log(messageIndex);
+                                //console.log('Updated index: ');
+                                //console.log(messageIndex);
                             }
                         }
                     });
@@ -195,6 +254,8 @@ class TwilioChatManager
 
     subscribeForClientEvents = () => {
         this.chatClient.on('connectionStateChanged', this.connectionChangedEvent);
+
+        this.eventEmitter.addListener('channels-loaded',()=>{console.log('Channels loaded event.');});
     }
 
 

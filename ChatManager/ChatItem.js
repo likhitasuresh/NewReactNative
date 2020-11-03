@@ -12,10 +12,6 @@ class ChatItem
     }
 
     update = () => {
-        console.log('History: ');
-        console.log(this.messageHistory);
-
-
         this.chatPreview.lastMessageText = this.messageHistory[0].text;
         this.chatPreview.lastMessageDate = this.messageHistory[0].createdAt;
     }
@@ -58,9 +54,8 @@ class ChatItem
         }
     }
 
-    //TODO: rewrite to satisfy the view
     setUnreadMessages = (number) => {
-        this.chatPreview.unreadMessagesCount = number;
+        this.chatPreview.unreadMessagesCount = number.toString();
     }
 
     addBatchToHistory = (messageBatch) => {
