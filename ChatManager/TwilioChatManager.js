@@ -185,7 +185,7 @@ class TwilioChatManager
         if(message.author !== this.userName){
             console.log('New message is not by author.');
             let messageItem = MessageItem.createFromTwilioMessage(message);
-            if(history.indexOf(messageItem.index) !== -1){
+            if(history.indexOf(messageItem.index) === -1){
                 this.setAllMessagesConsumed(channelSID,messageItem.index);
                 history.unshift(messageItem);
                 return true;
