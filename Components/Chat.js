@@ -7,7 +7,7 @@ import TwilioChatManager from '../ChatManager/TwilioChatManager';
 import { forEach } from 'lodash';
 
 LogBox.ignoreLogs([
-    'Non-serializable values were found in the navigation state',
+    'Non-serializable values were found in the navigation state!',
 ]);
 
 class Chat extends Component {
