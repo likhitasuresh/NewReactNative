@@ -184,11 +184,12 @@ class TwilioChatManager
     ingestNewMessage = (channelSID,message,history) => {
         if(message.author !== this.userName){
             console.log('New message is not by author.');
-
             let messageItem = MessageItem.createFromTwilioMessage(message);
-            this.setAllMessagesConsumed(channelSID,messageItem.index);
-            history.unshift(messageItem);
-            return true;
+            if(history.indexOf(messageItem.index) !== -1){
+                this.setAllMessagesConsumed(channelSID,messageItem.index);
+                history.unshift(messageItem);
+                return true;
+            }
         }
         return false;
     }
@@ -204,7 +205,7 @@ class TwilioChatManager
         if (this.userName === 'louis@nuleep-user.com')
             return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzhmMzVhMGQ5MTMyMWE5ODE0ZTI0OGRiM2M4OTI3Yjg3LTE2MDQzNzA5NjciLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0MzcwOTY3LCJleHAiOjE2MDQzODUzNjcsImlzcyI6IlNLOGYzNWEwZDkxMzIxYTk4MTRlMjQ4ZGIzYzg5MjdiODciLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.a7VC9Ts1vD3FEeO1ONqn75BSHqdHINZtIBEDPBtlC04';
         else if (this.userName === 'janesmith@nuleep-rec.com')
-            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTS2Y4MTFjYmEyMmE3NzI1ZWJjY2FjZWE4ZTU2ZjAxNWRmLTE2MDQzNjg2MzkiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJqYW5lc21pdGhAbnVsZWVwLXJlYy5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0MzY4NjM5LCJleHAiOjE2MDQzODMwMzksImlzcyI6IlNLZjgxMWNiYTIyYTc3MjVlYmNjYWNlYThlNTZmMDE1ZGYiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.nYiBXU4TnCtoPJ9Z9kyFUwCpHwtyCR-BlpC7pDAqiP4';
+            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzk2ZGFjYTE5ZTY2Y2I3NjdhMDk2MWM2MjdmZTdlN2I1LTE2MDQ0MzIxNDkiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJqYW5lc21pdGhAbnVsZWVwLXJlYy5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0NDMyMTQ5LCJleHAiOjE2MDQ0NDY1NDksImlzcyI6IlNLOTZkYWNhMTllNjZjYjc2N2EwOTYxYzYyN2ZlN2U3YjUiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.xrFZ_f56xFyrOCFFKsMJiiMqP2FEGotxE_v3bgulDs4';
     };
 
     initialChatItemsSort = (chatItemA,chatItemB) => {
