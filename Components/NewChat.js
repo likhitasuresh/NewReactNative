@@ -19,25 +19,23 @@ class NewChat extends Component{
 
     this.sendMessageFunction = this.params.sendMessage;
     this.unconsumedIndexUpdateFunction = this.params.setAllMessagesConsumed;
-    this.subscribeForChannelEvent = this.params.subscribeForChannelEvent;
+    this.subscribeForChannelEvents = this.params.subscribeForChannelEvent;
     this.getChannelBySID = this.params.getChannelBySID;
-    this.ingestNewMessage = this.params.ingestNewMessage;
+    this.ingestMessage = this.params.ingestNewMessage;
 
     this.state = {
       messages: this.params.messages,
       user1: this.params.user1,
       user2: this.params.user2
     }
-
+    console.log(this.state.messages);
   }
 
   componentDidMount(){
     if(!this.chatInfo.isSubscribedForNewMessages)
     {
-      this.chatInfo.isSubscribedForNewMessages = true;
-      this.subscribeForChannelEvent(this.chatInfo.channelSID,'messageAdded', this.onReceive);
+      this.subscribeForChannelEvents(this.chatInfo.channelSID,'messageAdded', this.onReceive);
     }
-
 
     if (this.chatInfo.unreadMessagesCount !== '0')
     {
@@ -49,20 +47,7 @@ class NewChat extends Component{
 
   onSend(messages){
     for(let i = 0;i<messages.length;i++){
-      //TODO: reset index once update event pushed successfully
-      messages[i].index = this.state.messages[0].index+1;
-      this.sendMessageFunction(this.chatInfo.channelSID,messages[i].text,messages[i].index);
-      //TODO: listen for the event of message delivered etc.
-
-      console.log('Sent message index: '+messages[i].index);
-
-      if(!this.indexIsInHistory(messages[i].index,this.state.messages)){
-        console.log('This is a new message, the message was added.');
-        this.state.messages.unshift(messages[i]);
-        this.setState({
-          messages: this.state.messages
-        });
-        }
+      this.sendMessageFunction(this.chatInfo.channelSID,messages[i].text);
       }
     }
 
@@ -78,14 +63,7 @@ class NewChat extends Component{
 
     onReceive = (message) => {
       console.log('Received message.');
-      let ingestion = this.ingestNewMessage(this.chatInfo.channelSID,message,this.state.messages);
-      console.log('Ingestion state (onReceive)'+ingestion.toString());
-      if (ingestion)
-      {
-        this.setState({
-          messages: this.state.messages
-        });
-      }
+      this.ingestMessage(this.chatInfo.channelSID,message,this.state.messages,this);
     }
 
   maxIndex = () => {
