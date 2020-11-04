@@ -13,6 +13,8 @@ class ChatPreview
 
         this.currentUserSID = '';
         this.interlocuterSID = '';
+
+        this.isSubscribedForNewMessages = false;
     }
 
     setMembers = (membersList,currentUser) => {

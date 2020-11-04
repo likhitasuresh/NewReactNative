@@ -144,6 +144,15 @@ class TwilioChatManager
         }
     }
 
+    getChatItem = (channelSID) => {
+        for(let i = 0;i < this.chatItems.length;i++) {
+            if (this.chatItems[i].channelSID === channelSID){
+                return this.chatItems[i].messageHistory;
+            }
+        }
+        console.log('Channel was not found!');
+    }
+
     /*---------------------- SETTERS --------------------*/
 
     setInitializationState = (state) =>{
@@ -170,29 +179,31 @@ class TwilioChatManager
         }
     }
 
-
-
     /*---------------------- AUXILLARY --------------------*/
 
+    //TODO: perhaps need to resubscribe after connection state changed
     subscribeForChannelEvent(channelSID,event,callback){
         console.log('Got to subscribe');
-        console.log(callback);
         let channel = this.getChannelBySID(channelSID);
         channel.on(event,callback);
+        console.log('Subscribed on channel: '+channelSID);
     }
 
     ingestNewMessage = (channelSID,message,history) => {
-        console.log('Ingestion method in manager.')
+        let messageItem = MessageItem.createFromTwilioMessage(message);
+
+        console.log('Ingestion method in manager. (MANAGER)')
+        console.log('New message index '+messageItem.index);
         if(message.author !== this.userName)
         {
             console.log('New message is not by user.');
-            let messageItem = MessageItem.createFromTwilioMessage(message);
+            //let messageItem = MessageItem.createFromTwilioMessage(message);
             this.setAllMessagesConsumed(channelSID,messageItem.index);
-
-            console.log('Index in history: '+history.indexOf())
-
-            history.unshift(messageItem);
-            return true;
+            if(!this.indexIsInHistory(messageItem.index,history)){
+                console.log('Message added to history form manager.');
+                history.unshift(messageItem);
+                return true;
+            }
         }
         return false;
     }
@@ -230,13 +241,13 @@ class TwilioChatManager
                 if (typeof result === 'number'){
                     //TODO: shoot success event
                     //console.log('Setting last message index: '+messageIndex.toString());
-                    channel.updateLastConsumedMessageIndex(messageIndex).then((result) => {
+                    channel.advanceLastConsumedMessageIndex(messageIndex).then((result) => {
                         //Update the channel info: last message
                         //set last consumed index to result
                         for(let i = 0;i < this.chatItems.length;i++){
                             if(this.chatItems[i].channelSID === channelSID){
                                 this.chatItems[i].update();
-                                //console.log('Updated index: ');
+                                console.log('Updated index on server: '+messageIndex.toString());
                                 //console.log(messageIndex);
                             }
                         }

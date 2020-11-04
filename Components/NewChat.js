@@ -32,7 +32,12 @@ class NewChat extends Component{
   }
 
   componentDidMount(){
-    this.subscribeForChannelEvent(this.chatInfo.channelSID,'messageAdded', this.onReceive);
+    if(!this.chatInfo.isSubscribedForNewMessages)
+    {
+      this.chatInfo.isSubscribedForNewMessages = true;
+      this.subscribeForChannelEvent(this.chatInfo.channelSID,'messageAdded', this.onReceive);
+    }
+
 
     if (this.chatInfo.unreadMessagesCount !== '0')
     {
@@ -51,17 +56,30 @@ class NewChat extends Component{
 
       console.log('Sent message index: '+messages[i].index);
 
-      this.state.messages.unshift(messages[i]);
-      this.setState({
+      if(!this.indexIsInHistory(messages[i].index,this.state.messages)){
+        console.log('This is a new message, the message was added.');
+        this.state.messages.unshift(messages[i]);
+        this.setState({
           messages: this.state.messages
         });
+        }
       }
     }
+
+  //TODO: delete this is hotfix
+  indexIsInHistory = (index,history) => {
+    for (let i = 0;i<history.length;i++){
+      if (history[i].index === index)
+        return true;
+    }
+    return false;
+  }
+
 
     onReceive = (message) => {
       console.log('Received message.');
       let ingestion = this.ingestNewMessage(this.chatInfo.channelSID,message,this.state.messages);
-      console.log('Ingestion state'+ingestion.toString());
+      console.log('Ingestion state (onReceive)'+ingestion.toString());
       if (ingestion)
       {
         this.setState({
