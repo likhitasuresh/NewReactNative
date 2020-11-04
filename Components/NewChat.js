@@ -44,21 +44,24 @@ class NewChat extends Component{
 
   onSend(messages){
     for(let i = 0;i<messages.length;i++){
-      //TODO: reset index once udate event pushed successfully
+      //TODO: reset index once update event pushed successfully
       messages[i].index = this.state.messages[0].index+1;
-      if(this.state.messages.indexOf(messages[i].index) === -1 ){
-        this.sendMessageFunction(this.chatInfo.channelSID,messages[i].text,messages[i].index);
-        //TODO: listen for the event of message delivered etc.
-        this.state.messages.unshift(messages[i]);
-        this.setState({
+      this.sendMessageFunction(this.chatInfo.channelSID,messages[i].text,messages[i].index);
+      //TODO: listen for the event of message delivered etc.
+
+      console.log('Sent message index: '+messages[i].index);
+
+      this.state.messages.unshift(messages[i]);
+      this.setState({
           messages: this.state.messages
         });
-      }
       }
     }
 
     onReceive = (message) => {
+      console.log('Received message.');
       let ingestion = this.ingestNewMessage(this.chatInfo.channelSID,message,this.state.messages);
+      console.log('Ingestion state'+ingestion.toString());
       if (ingestion)
       {
         this.setState({

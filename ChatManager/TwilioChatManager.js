@@ -182,14 +182,25 @@ class TwilioChatManager
     }
 
     ingestNewMessage = (channelSID,message,history) => {
-        if(message.author !== this.userName){
-            console.log('New message is not by author.');
+        console.log('Ingestion method in manager.')
+        if(message.author !== this.userName)
+        {
+            console.log('New message is not by user.');
             let messageItem = MessageItem.createFromTwilioMessage(message);
-            if(history.indexOf(messageItem.index) === -1){
-                this.setAllMessagesConsumed(channelSID,messageItem.index);
-                history.unshift(messageItem);
+            this.setAllMessagesConsumed(channelSID,messageItem.index);
+
+            console.log('Index in history: '+history.indexOf())
+
+            history.unshift(messageItem);
+            return true;
+        }
+        return false;
+    }
+
+    indexIsInHistory = (index,history) => {
+        for (let i = 0;i<history.length;i++){
+            if (history[i].index === index)
                 return true;
-            }
         }
         return false;
     }
@@ -203,7 +214,7 @@ class TwilioChatManager
     fetchNewToken = () => {
         //TODO: use gql to fetch the token
         if (this.userName === 'louis@nuleep-user.com')
-            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzhmMzVhMGQ5MTMyMWE5ODE0ZTI0OGRiM2M4OTI3Yjg3LTE2MDQzNzA5NjciLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0MzcwOTY3LCJleHAiOjE2MDQzODUzNjcsImlzcyI6IlNLOGYzNWEwZDkxMzIxYTk4MTRlMjQ4ZGIzYzg5MjdiODciLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.a7VC9Ts1vD3FEeO1ONqn75BSHqdHINZtIBEDPBtlC04';
+            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzkwYjA0OWM5ZjI3NDkxOGVhMTNhM2FhZGRmYTJjMTQ0LTE2MDQ0NTM5OTAiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0NDUzOTkwLCJleHAiOjE2MDQ0NjgzOTAsImlzcyI6IlNLOTBiMDQ5YzlmMjc0OTE4ZWExM2EzYWFkZGZhMmMxNDQiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.QoyvDbTp1penXvVG_6H65rxL6rUasRzpR-7ORZdRA4M';
         else if (this.userName === 'janesmith@nuleep-rec.com')
             return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzk2ZGFjYTE5ZTY2Y2I3NjdhMDk2MWM2MjdmZTdlN2I1LTE2MDQ0MzIxNDkiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJqYW5lc21pdGhAbnVsZWVwLXJlYy5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0NDMyMTQ5LCJleHAiOjE2MDQ0NDY1NDksImlzcyI6IlNLOTZkYWNhMTllNjZjYjc2N2EwOTYxYzYyN2ZlN2U3YjUiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.xrFZ_f56xFyrOCFFKsMJiiMqP2FEGotxE_v3bgulDs4';
     };
