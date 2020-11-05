@@ -312,10 +312,10 @@ class TwilioChatManager
         if (this.userName === 'louis@nuleep-user.com')
             return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzZkYzU1ZDA0M2IzYjU0Mzk2OGQ4NjU5NGFkODI3YjIxLTE2MDQ0Njg1NTkiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0NDY4NTU5LCJleHAiOjE2MDQ0ODI5NTksImlzcyI6IlNLNmRjNTVkMDQzYjNiNTQzOTY4ZDg2NTk0YWQ4MjdiMjEiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.6jJ-tgy_ntn0YITHUvsjcQX82c01cw-zPypG2ZjAyVg';
         else if (this.userName === 'janesmith@nuleep-rec.com')
-            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTS2EwMGE3M2Q3ZDJlMWU3OTM3NWM2MDAyMjRmZTc2ZWE1LTE2MDQ1MjIzODciLCJncmFudHMiOnsiaWRlbnRpdHkiOiJqYW5lc21pdGhAbnVsZWVwLXJlYy5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0NTIyMzg3LCJleHAiOjE2MDQ1MzY3ODcsImlzcyI6IlNLYTAwYTczZDdkMmUxZTc5Mzc1YzYwMDIyNGZlNzZlYTUiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.Gmj4-U8bIg2XMcW4qWovUvXAD-PiBousPbVIryzwtH0';
+            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTS2E5NjgyNDMwZGU3MDNjOWM0MTJkN2I1OGI0NTlkYjEyLTE2MDQ1OTkxMjMiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJqYW5lc21pdGhAbnVsZWVwLXJlYy5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0NTk5MTIzLCJleHAiOjE2MDQ2MTM1MjMsImlzcyI6IlNLYTk2ODI0MzBkZTcwM2M5YzQxMmQ3YjU4YjQ1OWRiMTIiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.16nboTaLvaHZm71Rg-nSr4t-rK9RsKkZd_FcaJkQ7H4';
         else if (this.userName === 'joeruiz@nuleep-rec.com')
             return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTS2ZiYmUyYzc3N2UzYmFlNTFlMjlkYzI5ZWY5MDAxZTNmLTE2MDQ1MjI0MTgiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJqb2VydWl6QG51bGVlcC1yZWMuY29tIiwiY2hhdCI6eyJzZXJ2aWNlX3NpZCI6IklTN2Y1MTIyZmM3YWE3NGUwNWJmMDA1ODM1ZTUzZjU5OTcifX0sImlhdCI6MTYwNDUyMjQxOCwiZXhwIjoxNjA0NTM2ODE4LCJpc3MiOiJTS2ZiYmUyYzc3N2UzYmFlNTFlMjlkYzI5ZWY5MDAxZTNmIiwic3ViIjoiQUNhNzZiM2ZlZmY2MGY4YjkxODU0YTYxYjMzZjY5NjVhNiJ9.BIfgj234kHw4HquMOeFsX9naiNUEXVbZyzPvwZ1CKik';
-        else if (this.userName === 'annie@user.com')
+        else if (this.userName === 'annie@nuleep-user.com')
             return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzFkNzY5YzBkOGM3ZDBiMGI1ZTg4MmU0N2VmY2Y3OWNkLTE2MDQ1MzMzMDkiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJhbm5pZUBudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0NTMzMzA5LCJleHAiOjE2MDQ1NDc3MDksImlzcyI6IlNLMWQ3NjljMGQ4YzdkMGIwYjVlODgyZTQ3ZWZjZjc5Y2QiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.B1duwdvsX-YnhdgFwgVqudttwUK7TEDP8Ys-zdVK_Vk';
     };
 
@@ -405,9 +405,9 @@ class TwilioChatManager
         this.chatClient.getChannelByUniqueName('annie@user.com*janesmith@nuleep-rec.com').then((channel)=>{
                 channel.delete();
         });
-        this.chatClient.getChannelByUniqueName('annie@user.com*joeruiz@nuleep-rec.com').then((channel)=>{
+/*        this.chatClient.getChannelByUniqueName('annie@user.com*joeruiz@nuleep-rec.com').then((channel)=>{
             channel.delete();
-        });
+        });*/
 
     }
 

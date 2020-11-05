@@ -24,6 +24,8 @@ class Chat extends Component {
     }
 
     componentDidMount() {
+        console.log('Mounted');
+        this.setState({isLoading: this.state.isLoading});
     }
 
     channelsLoadedHandler = () =>{
