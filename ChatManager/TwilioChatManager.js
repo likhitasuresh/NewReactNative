@@ -333,9 +333,9 @@ class TwilioChatManager
     fetchNewToken = () => {
         //TODO: use gql to fetch the token
         if (this.userName === 'louis@nuleep-user.com')
-            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzZkYzU1ZDA0M2IzYjU0Mzk2OGQ4NjU5NGFkODI3YjIxLTE2MDQ0Njg1NTkiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0NDY4NTU5LCJleHAiOjE2MDQ0ODI5NTksImlzcyI6IlNLNmRjNTVkMDQzYjNiNTQzOTY4ZDg2NTk0YWQ4MjdiMjEiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.6jJ-tgy_ntn0YITHUvsjcQX82c01cw-zPypG2ZjAyVg';
+            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzliZmJjMWIxZjE5ZWExYzlmNDk2ZGY3OTYxODc4NmVhLTE2MDQ2MTgwNzYiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0NjE4MDc2LCJleHAiOjE2MDQ2MzI0NzYsImlzcyI6IlNLOWJmYmMxYjFmMTllYTFjOWY0OTZkZjc5NjE4Nzg2ZWEiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.k_qhgCPNTLwfk00M5156pmyATNryYZMgc19TWw43Im4';
         else if (this.userName === 'janesmith@nuleep-rec.com')
-            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTS2E5NjgyNDMwZGU3MDNjOWM0MTJkN2I1OGI0NTlkYjEyLTE2MDQ1OTkxMjMiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJqYW5lc21pdGhAbnVsZWVwLXJlYy5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0NTk5MTIzLCJleHAiOjE2MDQ2MTM1MjMsImlzcyI6IlNLYTk2ODI0MzBkZTcwM2M5YzQxMmQ3YjU4YjQ1OWRiMTIiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.16nboTaLvaHZm71Rg-nSr4t-rK9RsKkZd_FcaJkQ7H4';
+            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzZiMzkwZjZjYTFkYzI0NGRjMmFhMzU4ZGI4ZjVjNzlhLTE2MDQ2MTY2MjAiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJqYW5lc21pdGhAbnVsZWVwLXJlYy5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0NjE2NjIwLCJleHAiOjE2MDQ2MzEwMjAsImlzcyI6IlNLNmIzOTBmNmNhMWRjMjQ0ZGMyYWEzNThkYjhmNWM3OWEiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.V6K34Y3O1q0sAVl0WkXMKSDwwm_bXGjw-oLz9kzTOts';
         else if (this.userName === 'joeruiz@nuleep-rec.com')
             return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTS2ZiYmUyYzc3N2UzYmFlNTFlMjlkYzI5ZWY5MDAxZTNmLTE2MDQ1MjI0MTgiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJqb2VydWl6QG51bGVlcC1yZWMuY29tIiwiY2hhdCI6eyJzZXJ2aWNlX3NpZCI6IklTN2Y1MTIyZmM3YWE3NGUwNWJmMDA1ODM1ZTUzZjU5OTcifX0sImlhdCI6MTYwNDUyMjQxOCwiZXhwIjoxNjA0NTM2ODE4LCJpc3MiOiJTS2ZiYmUyYzc3N2UzYmFlNTFlMjlkYzI5ZWY5MDAxZTNmIiwic3ViIjoiQUNhNzZiM2ZlZmY2MGY4YjkxODU0YTYxYjMzZjY5NjVhNiJ9.BIfgj234kHw4HquMOeFsX9naiNUEXVbZyzPvwZ1CKik';
         else if (this.userName === 'annie@nuleep-user.com')
@@ -381,7 +381,7 @@ class TwilioChatManager
 
         if(connectionState === 'connected'){
             this.eventEmitter.emit('client-connected');
-            this.deleteChannel();
+            //this.deleteChannel();
             this.loadChannels();
         }
         else if (connectionState === 'connecting'){

@@ -11,7 +11,8 @@ class MessageItem
             text: twilioMessage.body,
             createdAt: twilioMessage.timestamp,
             user: {
-                _id: twilioMessage.author
+                _id: twilioMessage.author,
+                name: twilioMessage.author
             },
         };
         return newMessage;

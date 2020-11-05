@@ -27,7 +27,11 @@ class NewChat extends Component{
     this.state = {
       messages: this.params.messages,
       user1: this.params.user1,
-      user2: this.params.user2
+      user2: this.params.user2,
+      user: {
+        _id: this.params.user1,
+        name: this.params.user1
+      }
     }
     console.log(this.state.messages);
   }
@@ -55,7 +59,7 @@ class NewChat extends Component{
     onReceive = () => {
       this.setState({
         messages: this.getMessages(this.chatInfo.channelSID)
-      })
+      });
   }
 
   maxIndex = () => {
@@ -108,10 +112,13 @@ class NewChat extends Component{
         <GiftedChat
             messages={this.state.messages}
             onSend={messages => this.onSend(messages)}
-            user={{_id: this.state.user1}}
+            user={this.state.user}
             renderBubble={this.renderBubble}
             isTyping ={true}
             alwaysShowSend={true}
+            renderUsernameOnMessage={true}
+            //showUserAvatar={true}
+            showAvatarForEveryMessage={false}
             // showUserAvatar={true}
             // bottomOffset={100}
             parsePatterns={this.parsePatterns}
