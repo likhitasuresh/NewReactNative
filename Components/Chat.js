@@ -18,14 +18,35 @@ class Chat extends Component {
         this.state = {
             search: '',
             isLoading: true,
-            chatsList: []
+            chatsList: [],
+            previews: []
         };
         this.chatManagerFunctions = this.props.route.params.managerFunctions;
     }
 
     componentDidMount() {
         console.log('Mounted');
-        this.setState({isLoading: this.state.isLoading});
+        this.setState({
+            previews: this.chatManagerFunctions.getChatPreviews()
+        });
+        console.log(this.state.previews);
+
+        for(let i = 0;i<this.state.previews.length;i++){
+            if(!this.state.previews[i].isSubscribedForNewMessageInChatList){
+                this.chatManagerFunctions.subscribeForChannelEvent(
+                    this.state.previews[i].channelSID,
+                    'messageAdded',
+                    this.updateHistory,
+                    this.state.previews[i].isSubscribedForNewMessageInChatList
+                );
+            }
+        }
+    }
+
+    updateHistory = ()=>{
+        this.setState({
+            previews: this.chatManagerFunctions.getChatPreviews()
+        });
     }
 
     channelsLoadedHandler = () =>{
@@ -91,7 +112,8 @@ class Chat extends Component {
                             unconsumedIndexUpdateFunction,
                             subscribeForEventFunc,
                             getChannelBySID,
-                            ingestNewMessage
+                            ingestNewMessage,
+                            getMessagesFromChat
                             ) => {
 
         this.navigate('NewChat', {
@@ -103,7 +125,8 @@ class Chat extends Component {
             setAllMessagesConsumed: unconsumedIndexUpdateFunction,
             subscribeForChannelEvent: subscribeForEventFunc,
             getChannelBySID: getChannelBySID,
-            ingestNewMessage: ingestNewMessage
+            ingestNewMessage: ingestNewMessage,
+            getMessagesFromChat: getMessagesFromChat
         });
     }
 
@@ -149,14 +172,14 @@ class Chat extends Component {
 
     render() {
         const { search } = this.state;
-        let previews = this.chatManagerFunctions.getChatPreviews();
-        if (previews.length > 0)
+        console.log(this.state.previews.length);
+        if (this.state.previews.length > 0)
         {
             return (
                 <Container>
                     <List>
                         {
-                            previews.map((chat,i) => {
+                            this.state.previews.map((chat,i) => {
                                 return (
                                     <ListItem key={i} avatar onPress={() => {
                                         // TODO pass user1 ID and user2 ID
@@ -168,7 +191,8 @@ class Chat extends Component {
                                             this.chatManagerFunctions.setAllMessagesConsumed,
                                             this.chatManagerFunctions.subscribeForChannelEvent,
                                             this.chatManagerFunctions.getChannelBySID,
-                                            this.chatManagerFunctions.ingestNewMessage
+                                            this.chatManagerFunctions.ingestNewMessage,
+                                            this.chatManagerFunctions.getMessagesFromChat
                                         );
                                     }} style={{
                                         minHeight: 35

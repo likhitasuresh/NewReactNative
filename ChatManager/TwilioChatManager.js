@@ -52,6 +52,8 @@ class TwilioChatManager
 
                         for(let i = 0 ;i<channels.length;i++){
                             channels[i].then((channel) => {
+                                this.initChannelEvents(channel);
+
                                 this.channels.push(ChannelItem.createFromTwilioChannel(channel));
                                 this.chatItems[i].setChannelSID(channel.sid);
                                 this.chatItems[i].setChannelName(channel.uniqueName);
@@ -84,9 +86,6 @@ class TwilioChatManager
                         Promise.all(unreadMessageCountPromises).then(()=>{
                            for(let i = 0;i<unreadMessageCountPromises.length;i++){
                                unreadMessageCountPromises[i].then((number) =>{
-                                   //console.log('Unconsumed: ');
-                                   //console.log(number);
-
                                    if (typeof number === 'number')
                                        this.chatItems[i].chatPreview.unreadMessagesCount = number.toString();
                                    else
@@ -110,6 +109,20 @@ class TwilioChatManager
             this.subscribeForClientEvents();
         });
     };
+
+    initChannelEvents = (channel) => {
+        channel.on('messageAdded',this.updateChannelHistory);
+    }
+
+    updateChannelHistory = (message) => {
+        let messageItem = MessageItem.createFromTwilioMessage(message);
+        let channelSID = message.channel.sid;
+        let  chatItem = this.getChatItem(channelSID);
+
+        this.setAllMessagesConsumed(channelSID,messageItem.index);
+        chatItem.messageHistory.unshift(messageItem);
+        chatItem.update();
+    }
 
     /*---------------------- GETTERS --------------------------*/
 
@@ -227,6 +240,7 @@ class TwilioChatManager
                                                 usersPromise[0].then((users) => {
                                                     Promise.all(users).done(()=>{
                                                         newChatItem.chatPreview.setMembers(users,this.userName);
+                                                        this.initChannelEvents(channel);
                                                         this.chatItems.unshift(newChatItem);
                                                     });
                                                 });
@@ -253,17 +267,18 @@ class TwilioChatManager
     }
 
     //TODO: perhaps need to resubscribe after connection state changed
-    subscribeForChannelEvent(channelSID,event,callback){
+    subscribeForChannelEvent(channelSID,event,callback,subscriptionFlag){
         console.log('Got to subscribe');
         let that = this; //It refers to component
-        if (!that.chatInfo.isSubscribedForNewMessages){
+        if (!subscriptionFlag){
             let channel = that.getChannelBySID(channelSID);
             channel.on(event,callback);
-            that.chatInfo.isSubscribedForNewMessages = true;
+            subscriptionFlag = true;
             console.log('Subscribed on channel: '+channelSID);
         }
     }
 
+    //TODO: delete when events handeled properly
     ingestNewMessage = (channelSID,message,history,component) => {
         let messageItem = MessageItem.createFromTwilioMessage(message);
 
@@ -368,8 +383,10 @@ class TwilioChatManager
     }
 
     subscribeForClientEvents = () => {
+        /*-------TWILIO-------*/
         this.chatClient.on('connectionStateChanged', this.connectionChangedEvent);
 
+        /*-------CUSTOM-------*/
         this.eventEmitter.addListener('channels-loaded',()=>{console.log('Channels loaded event.');});
     }
 

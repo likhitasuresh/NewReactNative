@@ -14,7 +14,8 @@ class ChatPreview
         this.currentUserSID = '';
         this.interlocuterSID = '';
 
-        this.isSubscribedForNewMessages = false;
+        this.isSubscribedForNewMessageInChatRoom = false;
+        this.isSubscribedForNewMessageInChatList = false;
     }
 
     setMembers = (membersList,currentUser) => {

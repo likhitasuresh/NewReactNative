@@ -22,6 +22,7 @@ class NewChat extends Component{
     this.subscribeForChannelEvents = this.params.subscribeForChannelEvent;
     this.getChannelBySID = this.params.getChannelBySID;
     this.ingestMessage = this.params.ingestNewMessage;
+    this.getMessages = this.params.getMessagesFromChat;
 
     this.state = {
       messages: this.params.messages,
@@ -32,9 +33,9 @@ class NewChat extends Component{
   }
 
   componentDidMount(){
-    if(!this.chatInfo.isSubscribedForNewMessages)
+    if(!this.chatInfo.isSubscribedForNewMessageInChatRoom)
     {
-      this.subscribeForChannelEvents(this.chatInfo.channelSID,'messageAdded', this.onReceive);
+      this.subscribeForChannelEvents(this.chatInfo.channelSID,'messageAdded', this.onReceive,this.chatInfo.isSubscribedForNewMessageInChatRoom);
     }
 
     if (this.chatInfo.unreadMessagesCount !== '0')
@@ -51,20 +52,11 @@ class NewChat extends Component{
       }
     }
 
-  //TODO: delete this is hotfix
-  indexIsInHistory = (index,history) => {
-    for (let i = 0;i<history.length;i++){
-      if (history[i].index === index)
-        return true;
-    }
-    return false;
+    onReceive = () => {
+      this.setState({
+        messages: this.getMessages(this.chatInfo.channelSID)
+      })
   }
-
-
-    onReceive = (message) => {
-      console.log('Received message.');
-      this.ingestMessage(this.chatInfo.channelSID,message,this.state.messages,this);
-    }
 
   maxIndex = () => {
     let indexes = [];
