@@ -32,8 +32,15 @@ class TwilioChatManager
         });
     }
 
-
-    //TODO: add unConsumedLogic
+    /*
+    Used to initialize chat items:
+        client - twilio client used to listen for global events, and get newly added chat from the server.
+        channel - used to lesten for the channel events, download users info, update message history.
+                    stored inside ChannelItem along with channel sid.
+        descriptors - have some info about channel, but is only used to get related channel here.
+        chatItems - contains channel sid, downloaded history,and a preview object.
+        chatPreview - the small amount of information related to the channel, used to display in the chat list.
+    */
     loadChannels =  () => {
             this.chatItems = [];
             this.chatClient.getUserChannelDescriptors().then((paginator) => {
@@ -101,6 +108,72 @@ class TwilioChatManager
                     //console.log('Even should shoot now:');
                 });
             });
+    }
+
+    createNewChannel = (otherUser) => {
+        const availableUsers = ['janesmith@nuleep-rec.com','joeruiz@nuleep-rec.com','annie@user.com','louis@nuleep-user.com'];
+
+        if(availableUsers.indexOf(otherUser) !== -1)
+        {
+            if(this.userName !== otherUser)
+            {
+                if(!this.chatExists(otherUser))
+                {
+                    let taskPromise = [this.chatClient.createChannel({
+                        isPrivate: true,
+                        uniqueName: this.concatUserNames(otherUser)
+                    })];
+
+                    Promise.all(taskPromise).then(()=>{
+                        taskPromise[0].then((channel) => {
+                            this.channels.push(ChannelItem.createFromTwilioChannel(channel));
+
+                            channel.join(this.userName).then(()=>{
+                                let messagePromise = [];
+                                let usersPromise = [];
+                                let newChatItem = new ChatItem();
+                                let newMessage = {
+                                    sid: 'initial_message',
+                                    index: 0,
+                                    body: this.INITIAL_MESSAGE_TEXT,
+                                    timestamp: new Date(),
+                                    author: this.userName
+                                };
+
+                                channel.add(otherUser).then(()=>{
+                                    messagePromise.push(channel.sendMessage(this.INITIAL_MESSAGE_TEXT));
+
+                                    Promise.all(messagePromise).done(()=>{
+                                        messagePromise[0].then((messageIndex) => {
+                                            usersPromise.push(channel.getMembers());
+
+                                            newChatItem.setChannelName(channel.uniqueName);
+                                            newChatItem.setChannelSID(channel.sid);
+                                            newChatItem.setMessageHistory([newMessage]);
+                                            newChatItem.update();
+
+                                            Promise.all(usersPromise).done(()=>{
+                                                usersPromise[0].then((users) => {
+                                                    Promise.all(users).done(()=>{
+                                                        newChatItem.chatPreview.setMembers(users,this.userName);
+                                                        this.initChannelEvents(channel);
+                                                        this.chatItems.unshift(newChatItem);
+                                                    });
+                                                });
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    })
+                }
+            }
+        }
+        else
+        {
+            console.log('User '+otherUser+' was not found!');
+        }
     }
 
     initializeClient = (options={}) => {
@@ -194,71 +267,6 @@ class TwilioChatManager
     }
 
     /*---------------------- AUXILLARY --------------------*/
-    createNewChannel = (otherUser) => {
-        const availableUsers = ['janesmith@nuleep-rec.com','joeruiz@nuleep-rec.com','annie@user.com','louis@nuleep-user.com'];
-
-        if(availableUsers.indexOf(otherUser) !== -1)
-        {
-            if(this.userName !== otherUser)
-            {
-                if(!this.chatExists(otherUser))
-                {
-                    let taskPromise = [this.chatClient.createChannel({
-                                                        isPrivate: true,
-                                                        uniqueName: this.concatUserNames(otherUser)
-                    })];
-
-                    Promise.all(taskPromise).then(()=>{
-                        taskPromise[0].then((channel) => {
-                            this.channels.push(ChannelItem.createFromTwilioChannel(channel));
-
-                            channel.join(this.userName).then(()=>{
-                                let messagePromise = [];
-                                let usersPromise = [];
-                                let newChatItem = new ChatItem();
-                                let newMessage = {
-                                    sid: 'initial_message',
-                                    index: 0,
-                                    body: this.INITIAL_MESSAGE_TEXT,
-                                    timestamp: new Date(),
-                                    author: this.userName
-                                };
-
-                                channel.add(otherUser).then(()=>{
-                                    messagePromise.push(channel.sendMessage(this.INITIAL_MESSAGE_TEXT));
-
-                                    Promise.all(messagePromise).done(()=>{
-                                        messagePromise[0].then((messageIndex) => {
-                                            usersPromise.push(channel.getMembers());
-
-                                            newChatItem.setChannelName(channel.uniqueName);
-                                            newChatItem.setChannelSID(channel.sid);
-                                            newChatItem.setMessageHistory([newMessage]);
-                                            newChatItem.update();
-
-                                            Promise.all(usersPromise).done(()=>{
-                                                usersPromise[0].then((users) => {
-                                                    Promise.all(users).done(()=>{
-                                                        newChatItem.chatPreview.setMembers(users,this.userName);
-                                                        this.initChannelEvents(channel);
-                                                        this.chatItems.unshift(newChatItem);
-                                                    });
-                                                });
-                                            });
-                                        });
-                                    });
-                                });
-                            });
-                        });
-                    })
-                }
-            }
-        }
-        else
-        {
-            console.log('User '+otherUser+' was not found!');
-        }
-    }
 
     //Generates the uniq name for a dialogue channel for now
     concatUserNames = (otherUser) => {
@@ -373,7 +381,7 @@ class TwilioChatManager
 
         if(connectionState === 'connected'){
             this.eventEmitter.emit('client-connected');
-            //this.deleteChannel();
+            this.deleteChannel();
             this.loadChannels();
         }
         else if (connectionState === 'connecting'){
@@ -422,9 +430,9 @@ class TwilioChatManager
         this.chatClient.getChannelByUniqueName('annie@user.com*janesmith@nuleep-rec.com').then((channel)=>{
                 channel.delete();
         });
-/*        this.chatClient.getChannelByUniqueName('annie@user.com*joeruiz@nuleep-rec.com').then((channel)=>{
+        this.chatClient.getChannelByUniqueName('annie@user.com*joeruiz@nuleep-rec.com').then((channel)=>{
             channel.delete();
-        });*/
+        });
 
     }
 
