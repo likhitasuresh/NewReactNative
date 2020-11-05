@@ -8,12 +8,14 @@ class CreateNewChannel extends Component{
             user: ""
         }
         this.chatsList = this.props.route.params.chatsList;
-
+        this.managerFunctions = this.props.route.params.managerFunctions;
     }
 
     validateUsername(){
-        console.log(this.state.user);
-        console.log(this.chatsList);
+        //console.log(this.state.user);
+        //console.log(this.chatsList);
+        console.log('Creating channel.');
+        this.managerFunctions.createNewChannel(this.state.user);
     }
 
     render(){

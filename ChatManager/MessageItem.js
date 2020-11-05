@@ -14,7 +14,6 @@ class MessageItem
                 _id: twilioMessage.author
             },
         };
-
         return newMessage;
     }
 

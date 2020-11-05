@@ -22,6 +22,8 @@ class TwilioChatManager
 
         this.setNewToken();
         this.initializeClient();
+
+        this.INITIAL_MESSAGE_TEXT = 'Hi! Join me in the chat!';
     }
 
     static create = (username) => {
@@ -35,7 +37,7 @@ class TwilioChatManager
     loadChannels =  () => {
             this.chatItems = [];
             this.chatClient.getUserChannelDescriptors().then((paginator) => {
-                Promise.all(paginator.items).then((descriptors) => {
+                Promise.all(paginator.items).done((descriptors) => {
                     let channels = [];
                     for(let i = 0;i<descriptors.length;i++)
                     {
@@ -179,6 +181,76 @@ class TwilioChatManager
     }
 
     /*---------------------- AUXILLARY --------------------*/
+    createNewChannel = (otherUser) => {
+        const availableUsers = ['janesmith@nuleep-rec.com','joeruiz@nuleep-rec.com','annie@user.com','louis@nuleep-user.com'];
+
+        if(availableUsers.indexOf(otherUser) !== -1)
+        {
+            if(this.userName !== otherUser)
+            {
+                if(!this.chatExists(otherUser))
+                {
+                    let taskPromise = [this.chatClient.createChannel({
+                                                        isPrivate: true,
+                                                        uniqueName: this.concatUserNames(otherUser)
+                    })];
+
+                    Promise.all(taskPromise).then(()=>{
+                        taskPromise[0].then((channel) => {
+                            this.channels.push(ChannelItem.createFromTwilioChannel(channel));
+
+                            channel.join(this.userName).then(()=>{
+                                let messagePromise = [];
+                                let usersPromise = [];
+                                let newChatItem = new ChatItem();
+                                let newMessage = {
+                                    sid: 'initial_message',
+                                    index: 0,
+                                    body: this.INITIAL_MESSAGE_TEXT,
+                                    timestamp: new Date(),
+                                    author: this.userName
+                                };
+
+                                channel.add(otherUser).then(()=>{
+                                    messagePromise.push(channel.sendMessage(this.INITIAL_MESSAGE_TEXT));
+
+                                    Promise.all(messagePromise).done(()=>{
+                                        messagePromise[0].then((messageIndex) => {
+                                            usersPromise.push(channel.getMembers());
+
+                                            newChatItem.setChannelName(channel.uniqueName);
+                                            newChatItem.setChannelSID(channel.sid);
+                                            newChatItem.setMessageHistory([newMessage]);
+                                            newChatItem.update();
+
+                                            Promise.all(usersPromise).done(()=>{
+                                                usersPromise[0].then((users) => {
+                                                    Promise.all(users).done(()=>{
+                                                        newChatItem.chatPreview.setMembers(users,this.userName);
+                                                        this.chatItems.unshift(newChatItem);
+                                                    });
+                                                });
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    })
+                }
+            }
+        }
+        else
+        {
+            console.log('User '+otherUser+' was not found!');
+        }
+    }
+
+    //Generates the uniq name for a dialogue channel for now
+    concatUserNames = (otherUser) => {
+        let users = [this.userName,otherUser].sort();
+        return users[0]+'*'+users[1];
+    }
 
     //TODO: perhaps need to resubscribe after connection state changed
     subscribeForChannelEvent(channelSID,event,callback){
@@ -220,6 +292,15 @@ class TwilioChatManager
         return false;
     }
 
+    chatExists = (otherUser) => {
+        for(let i = 0;i<this.chatItems.length;i++){
+            if(this.chatItems[i].chatPreview.interlocutor === otherUser){
+                return true;
+            }
+        }
+        return false;
+    }
+
     refreshToken = (options={}) => {
         //TODO: checks on each of the steps needed.
         this.setNewToken();
@@ -231,7 +312,11 @@ class TwilioChatManager
         if (this.userName === 'louis@nuleep-user.com')
             return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzZkYzU1ZDA0M2IzYjU0Mzk2OGQ4NjU5NGFkODI3YjIxLTE2MDQ0Njg1NTkiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0NDY4NTU5LCJleHAiOjE2MDQ0ODI5NTksImlzcyI6IlNLNmRjNTVkMDQzYjNiNTQzOTY4ZDg2NTk0YWQ4MjdiMjEiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.6jJ-tgy_ntn0YITHUvsjcQX82c01cw-zPypG2ZjAyVg';
         else if (this.userName === 'janesmith@nuleep-rec.com')
-            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzQzMTJkZDUyMDMyZDUzNDg5MjBlN2RhYmQ3MjA4OGMyLTE2MDQ0NzE4MTYiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJqYW5lc21pdGhAbnVsZWVwLXJlYy5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0NDcxODE2LCJleHAiOjE2MDQ0ODYyMTYsImlzcyI6IlNLNDMxMmRkNTIwMzJkNTM0ODkyMGU3ZGFiZDcyMDg4YzIiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.10zoIolr52Xj8icqc6prWQBrztbJH3WZ8m1mYGBi9dk';
+            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTS2EwMGE3M2Q3ZDJlMWU3OTM3NWM2MDAyMjRmZTc2ZWE1LTE2MDQ1MjIzODciLCJncmFudHMiOnsiaWRlbnRpdHkiOiJqYW5lc21pdGhAbnVsZWVwLXJlYy5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0NTIyMzg3LCJleHAiOjE2MDQ1MzY3ODcsImlzcyI6IlNLYTAwYTczZDdkMmUxZTc5Mzc1YzYwMDIyNGZlNzZlYTUiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.Gmj4-U8bIg2XMcW4qWovUvXAD-PiBousPbVIryzwtH0';
+        else if (this.userName === 'joeruiz@nuleep-rec.com')
+            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTS2ZiYmUyYzc3N2UzYmFlNTFlMjlkYzI5ZWY5MDAxZTNmLTE2MDQ1MjI0MTgiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJqb2VydWl6QG51bGVlcC1yZWMuY29tIiwiY2hhdCI6eyJzZXJ2aWNlX3NpZCI6IklTN2Y1MTIyZmM3YWE3NGUwNWJmMDA1ODM1ZTUzZjU5OTcifX0sImlhdCI6MTYwNDUyMjQxOCwiZXhwIjoxNjA0NTM2ODE4LCJpc3MiOiJTS2ZiYmUyYzc3N2UzYmFlNTFlMjlkYzI5ZWY5MDAxZTNmIiwic3ViIjoiQUNhNzZiM2ZlZmY2MGY4YjkxODU0YTYxYjMzZjY5NjVhNiJ9.BIfgj234kHw4HquMOeFsX9naiNUEXVbZyzPvwZ1CKik';
+        else if (this.userName === 'annie@user.com')
+            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzFkNzY5YzBkOGM3ZDBiMGI1ZTg4MmU0N2VmY2Y3OWNkLTE2MDQ1MzMzMDkiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJhbm5pZUBudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0NTMzMzA5LCJleHAiOjE2MDQ1NDc3MDksImlzcyI6IlNLMWQ3NjljMGQ4YzdkMGIwYjVlODgyZTQ3ZWZjZjc5Y2QiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.B1duwdvsX-YnhdgFwgVqudttwUK7TEDP8Ys-zdVK_Vk';
     };
 
     initialChatItemsSort = (chatItemA,chatItemB) => {
@@ -273,6 +358,7 @@ class TwilioChatManager
 
         if(connectionState === 'connected'){
             this.eventEmitter.emit('client-connected');
+            //this.deleteChannel();
             this.loadChannels();
         }
         else if (connectionState === 'connecting'){
@@ -304,6 +390,25 @@ class TwilioChatManager
                 console.log('Jane joined');
             });
         });
+    }
+
+    joinBothUsers = () => {
+        this.chatClient.getChannelBySid('CH891cbd3784684e6bb46baca067e311e3').then((channel) =>{
+            channel.sendMessage(this.INITIAL_MESSAGE_TEXT);
+        });
+    }
+
+    deleteChannel = () =>{
+        this.chatClient.getChannelByUniqueName('janesmith@nuleep-rec.com*joeruiz@nuleep-rec.com').then((channel)=>{
+            channel.delete();
+        });
+        this.chatClient.getChannelByUniqueName('annie@user.com*janesmith@nuleep-rec.com').then((channel)=>{
+                channel.delete();
+        });
+        this.chatClient.getChannelByUniqueName('annie@user.com*joeruiz@nuleep-rec.com').then((channel)=>{
+            channel.delete();
+        });
+
     }
 
 }

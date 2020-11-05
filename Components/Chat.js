@@ -113,10 +113,11 @@ class Chat extends Component {
     }
 
     createNewChannel(){
-        console.log("hi hello");
-        console.log(this.state.chatsList);
+        console.log("Add new user");
+
         this.navigate('CreateNewChannel', {
-            chatsList: this.chatManagerFunctions.getChatNames
+            chatsList: this.chatManagerFunctions.getChatNames,
+            managerFunctions: this.chatManagerFunctions
         });
     }
 
