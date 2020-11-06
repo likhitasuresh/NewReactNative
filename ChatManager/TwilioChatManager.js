@@ -178,6 +178,23 @@ class TwilioChatManager
         }
     }
 
+
+    deleteChannel = (channelSID) => {
+        let channel = this.getChannelBySID(channelSID);
+        channel.delete().then((deletedChannel) => {
+            for (let i = 0;i<this.chatItems.length;i++){
+                if(this.chatItems[i].channelSID === channelSID){
+                    this.chatItems.splice(i,1);
+                }
+            }
+            for(let i = 0;i<this.channels.length;i++){
+                if(this.channels.channelSID === channelSID){
+                    this.channels.splice(i,1);
+                }
+            }
+        });
+    }
+
     initializeClient = (options={}) => {
         TwilioChatClient.create(this.accessToken,options).then((client) => {
             this.chatClient = client;
@@ -329,7 +346,7 @@ class TwilioChatManager
     fetchNewToken = () => {
         //TODO: use gql to fetch the token
         if (this.userName === 'louis@nuleep-user.com')
-            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzZlYmMzYTY3ZmU1YjgxMWRmNjUzODk0YjBmMmRlMTE5LTE2MDQ2MjMzNDQiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0NjIzMzQ0LCJleHAiOjE2MDQ2Mzc3NDQsImlzcyI6IlNLNmViYzNhNjdmZTViODExZGY2NTM4OTRiMGYyZGUxMTkiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.NpmcFiKdA3D0K0I8yaz_gtYLII8wUdiVL1J97TzZAl4';
+            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTS2E3ZWJkZDVkMmEwNjA4Y2MzM2JhNjIyYTczMDU3Y2VhLTE2MDQ2Mzg0NDYiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0NjM4NDQ2LCJleHAiOjE2MDQ2NTI4NDYsImlzcyI6IlNLYTdlYmRkNWQyYTA2MDhjYzMzYmE2MjJhNzMwNTdjZWEiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.LbMwdJBD1Ud23H57b4Bkzb4hSXTq1bmhj1Gmj9QyIzg';
         else if (this.userName === 'janesmith@nuleep-rec.com')
             return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTS2IxNzNlYzI4OGZhZDk1YjgxMGFkMzQ0NTNjNDc3ZWVjLTE2MDQ2MjI3NjUiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJqYW5lc21pdGhAbnVsZWVwLXJlYy5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0NjIyNzY1LCJleHAiOjE2MDQ2MzcxNjUsImlzcyI6IlNLYjE3M2VjMjg4ZmFkOTViODEwYWQzNDQ1M2M0NzdlZWMiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.qi2tdKznwSnmJ3BNbo0Zdz99IopTPBENm6bNcXGD2KQ';
         else if (this.userName === 'joeruiz@nuleep-rec.com')

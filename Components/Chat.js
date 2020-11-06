@@ -118,6 +118,14 @@ class Chat extends Component {
         this.setState({ search });
     };
 
+    // you should pass SID like onLongPress = ()=>{this.deleteChat(chat.channelSID)}
+    deleteChat = (channelSID) => {
+        this.chatManagerFunctions.deleteChat(channelSID);
+        this.setState({
+            previews: this.chatManagerFunctions.getChatPreviews()
+        });
+    }
+
     openDetailedChatView = (chatPreview,
                             messages,
                             user1,
