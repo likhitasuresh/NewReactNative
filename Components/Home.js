@@ -20,7 +20,7 @@ class Home extends React.Component {
         let jane = "janesmith@nuleep-rec.com";
         let joe = 'joeruiz@nuleep-rec.com';
         let ann = 'annie@user.com';
-        TwilioChatManager.create(luis).then((manager) => {
+        TwilioChatManager.create(joe).then((manager) => {
             this.chatManager = manager;
         });
     }

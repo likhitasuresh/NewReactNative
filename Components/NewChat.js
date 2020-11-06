@@ -52,7 +52,7 @@ class NewChat extends Component{
 
   onSend(messages){
     for(let i = 0;i<messages.length;i++){
-      this.sendMessageFunction(this.chatInfo.channelSID,messages[i].text);
+        this.sendMessageFunction(this.chatInfo.channelSID,messages[i].text);
       }
     }
 
