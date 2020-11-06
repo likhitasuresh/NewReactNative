@@ -6,6 +6,7 @@ import { LogBox } from 'react-native';
 import TwilioChatManager from '../ChatManager/TwilioChatManager';
 import { forEach } from 'lodash';
 
+
 LogBox.ignoreLogs([
     'Non-serializable values were found in the navigation state!',
 ]);
@@ -15,6 +16,14 @@ class Chat extends Component {
     constructor(props){
         super(props);
         this.navigate = this.props.navigation.navigate;
+        this.props.navigation.setOptions({
+            headerStyle: {
+                backgroundColor: '#15adaa'
+            },
+            headerTintColor: '#ffffff',
+            title: 'Conversations'
+        });
+
         this.state = {
             search: '',
             isLoading: true,
@@ -230,7 +239,7 @@ class Chat extends Component {
                         active={this.state.active}
                         direction="right"
                         containerStyle={{ marginLeft: 10}}
-                        style={{ backgroundColor: '#5067FF' }}
+                        style={{ backgroundColor: '#15aeaa' }}
                         onPress={() => this.createNewChannel() }>
                             <Icon name="md-person-add" />
                     </Fab>

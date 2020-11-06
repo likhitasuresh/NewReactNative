@@ -13,9 +13,19 @@ const styles = StyleSheet.create({
 class NewChat extends Component{
   constructor(props){
     super(props);
+
     this.params = this.props.route.params;
     this.chatInfo = this.params.chatPreview;
     this.channel = this.chatInfo.channelName;
+
+    this.props.navigation.setOptions({
+      headerStyle: {
+        backgroundColor: '#15adaa'
+      },
+      headerTintColor: '#ffffff',
+      title: this.chatInfo.interlocutor
+    });
+
 
     this.sendMessageFunction = this.params.sendMessage;
     this.unconsumedIndexUpdateFunction = this.params.setAllMessagesConsumed;
@@ -33,7 +43,6 @@ class NewChat extends Component{
         name: this.params.user1
       }
     }
-    console.log(this.state.messages);
   }
 
   componentDidMount(){
@@ -62,13 +71,43 @@ class NewChat extends Component{
       });
   }
 
-  maxIndex = () => {
-    let indexes = [];
-    for(let i = 0;i<this.state.messages.length;i++){
-      indexes.push(this.state.messages[i].index);
-    }
-    return Math.max.apply(null,indexes);
-  }
+  isLocutor = (userName) => {
+    if (userName === this.chatInfo.currentUser)
+      return false;
+    return true;
+ }
+
+/*  TEST_renderBubble(props) {
+/!*    if (props.isSameUser(props.currentMessage, props.previousMessage) && props.isSameDay(props.currentMessage, props.previousMessage)) {
+      return (
+          <Bubble
+              {...props}
+          />
+      );
+    }*!/
+    console.log(props);
+    return (
+        <View>
+          {
+            (props.currentMessage.user.name !== props.previousMessage.user.name &&
+            props.currentMessage.user.name !== props.user.name) === true ? <></>:
+                <Text style={{fontSize: 10,}}>{props.currentMessage.user.name}</Text>
+          }
+
+          <Bubble
+              {...props}
+              wrapperStyle={{
+                left: {
+                  backgroundColor: '#fff'
+                },
+                right: {
+                  backgroundColor: '#15adaa'
+                },
+              }}
+          />
+        </View>
+    );
+  }*/
 
   renderSend(props) {
     return (
@@ -89,7 +128,7 @@ class NewChat extends Component{
             backgroundColor: '#fff'
           },
           right: {
-            backgroundColor: '#5386C9'
+            backgroundColor: '#15adaa'
           },
         }}
       />

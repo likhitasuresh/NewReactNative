@@ -4,6 +4,14 @@ class CreateNewChannel extends Component{
 
     constructor(props){
         super(props);
+        this.props.navigation.setOptions({
+            headerStyle: {
+                backgroundColor: '#15adaa'
+            },
+            headerTintColor: '#ffffff',
+            title: 'Create chat'
+        });
+
         this.state = {
             user: ""
         }
@@ -27,7 +35,7 @@ class CreateNewChannel extends Component{
                             placeholder='Enter Username'
                             name="user"
                             onChangeText = {(user) => this.setState({ user: user})}/>
-                        <Button large style={{ margin: "auto"}} onPress = {() => this.validateUsername()} >
+                        <Button large style={{ margin: "auto",backgroundColor: '#15adaa'}} onPress = {() => this.validateUsername()} >
                             <Icon name='ios-search' />
                         </Button>
                     </InputGroup>
