@@ -23,6 +23,7 @@ class CreateNewChannel extends Component{
         //console.log(this.state.user);
         //console.log(this.chatsList);
         console.log('Creating channel.');
+        alert('Channel Created!');
         this.managerFunctions.createNewChannel(this.state.user);
     }
 

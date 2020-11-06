@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
-import { Container, Header, Content, List, ListItem, Left, Body, Right, Thumbnail, Text, Badge, Button, Icon, Fab } from 'native-base';
+import { Container, Header, Content, List, ListItem, Left, Body, Right, Thumbnail, Text, Badge, Button, Icon, Fab, Spinner } from 'native-base';
+import { MenuProvider } from 'react-native-popup-menu';
 import { LogBox } from 'react-native';
 LogBox.ignoreAllLogs();
 
@@ -26,9 +27,11 @@ class Chat extends Component {
             search: '',
             isLoading: true,
             chatsList: [],
-            previews: []
+            previews: [], 
+            isVisible: false
         };
         this.chatManagerFunctions = this.props.route.params.managerFunctions;
+        
     }
 
     componentDidMount() {
@@ -119,7 +122,7 @@ class Chat extends Component {
     };
 
     // you should pass SID like onLongPress = ()=>{this.deleteChat(chat.channelSID)}
-    deleteChat = (channelSID) => {
+    deleteChat(channelSID){
         this.chatManagerFunctions.deleteChat(channelSID);
         this.setState({
             previews: this.chatManagerFunctions.getChatPreviews()
@@ -216,7 +219,9 @@ class Chat extends Component {
                                             this.chatManagerFunctions.ingestNewMessage,
                                             this.chatManagerFunctions.getMessagesFromChat
                                         );
-                                    }} style={{
+                                    }} 
+                                    onLongPress={() => this.deleteChat(chat.channelSID)}
+                                    style={{
                                         minHeight: 35
                                     }}>
                                         <Left>
@@ -248,6 +253,7 @@ class Chat extends Component {
                             })
                         }
                     </List>
+                    
                     <Fab
                         active={this.state.active}
                         direction="right"
@@ -260,7 +266,7 @@ class Chat extends Component {
             )}
         else
         {
-            return (<Text>Loading...</Text>);
+            return (<Spinner color='blue' />);
         }
     }
 }
