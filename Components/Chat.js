@@ -77,36 +77,43 @@ class Chat extends Component {
 
     getLastMessageDate = (date) =>
     {
-        let messageDate = date.getTime();
-        let currentTime = Date.now();
+        if(date !== 'undefined'){
+            let messageDate = date.getTime();
+            let currentTime = Date.now();
 
-        if (this.isToday(date)) {
-            let timeString = ('0'+date.getHours()).slice(-2)+':'+
-                ('0'+date.getMinutes()).slice(-2);
-            return timeString;
-        }
-        else if (messageDate < currentTime - 604800000) {
-            let weekday = new Array(7);
-            weekday[0] = "Sunday";
-            weekday[1] = "Monday";
-            weekday[2] = "Tuesday";
-            weekday[3] = "Wednesday";
-            weekday[4] = "Thursday";
-            weekday[5] = "Friday";
-            weekday[6] = "Saturday";
-            let onlyDate = weekday[date.getDay()];
-            try
-            {
-                return onlyDate;
+            if (this.isToday(date)) {
+                let timeString = ('0'+date.getHours()).slice(-2)+':'+
+                    ('0'+date.getMinutes()).slice(-2);
+                return timeString;
             }
-            catch (exception) {
-                return 'Error loading';
+            else if (messageDate < (currentTime - 604800000)) {
+                let weekday = new Array(7);
+                weekday[0] = "Sunday";
+                weekday[1] = "Monday";
+                weekday[2] = "Tuesday";
+                weekday[3] = "Wednesday";
+                weekday[4] = "Thursday";
+                weekday[5] = "Friday";
+                weekday[6] = "Saturday";
+                let onlyDate = weekday[date.getDay()];
+                try
+                {
+                    return onlyDate;
+                }
+                catch (exception) {
+                    return 'Error loading';
+                }
+            }
+            else
+            {
+                return date.toDateString();
             }
         }
         else
         {
-            return date.toDateString();
+            return 'Read error';
         }
+
     }
 
     updateSearch = (search) => {
