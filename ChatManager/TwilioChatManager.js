@@ -388,7 +388,7 @@ class TwilioChatManager
 
         if(connectionState === 'connected'){
             this.eventEmitter.emit('client-connected');
-            //this.deleteChannel();
+            //this.TEST_deleteChannel();
             this.loadChannels();
         }
         else if (connectionState === 'connecting'){
@@ -429,7 +429,7 @@ class TwilioChatManager
         });
     }
 
-    deleteChannel = () =>{
+    TEST_deleteChannel = () =>{
         this.chatClient.getChannelByUniqueName('janesmith@nuleep-rec.com*joeruiz@nuleep-rec.com').then((channel)=>{
             channel.delete();
         });
