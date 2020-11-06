@@ -103,11 +103,9 @@ class TwilioChatManager
                                    }
                                });
                            }
-                           console.log(this.chatItems);
                         });
                     });
                     this.setInitializationState(true);
-                    //console.log('Even should shoot now:');
                 });
             });
     }
@@ -190,12 +188,9 @@ class TwilioChatManager
     }
 
     updateChannelHistory = (message) => {
-        console.log(message.author);
         let messageItem = MessageItem.createFromTwilioMessage(message);
         let channelSID = message.channel.sid;
         let chatItem = this.getChatItem(channelSID);
-
-        console.log(messageItem);
 
         this.setAllMessagesConsumed(channelSID,messageItem.index);
         chatItem.messageHistory.unshift(messageItem);
@@ -281,7 +276,6 @@ class TwilioChatManager
 
     //TODO: perhaps need to resubscribe after connection state changed
     subscribeForChannelEvent(channelSID,event,callback,subscriptionFlag){
-        console.log('Got to subscribe');
         let that = this; //It refers to component
         if (!subscriptionFlag){
             let channel = that.getChannelBySID(channelSID);
@@ -295,12 +289,7 @@ class TwilioChatManager
     ingestNewMessage = (channelSID,message,history,component) => {
         let messageItem = MessageItem.createFromTwilioMessage(message);
 
-        console.log('Ingestion method in manager. (MANAGER)')
-        console.log('New message index '+messageItem.index);
-        console.log('New message is from '+messageItem.user);
-
         this.setAllMessagesConsumed(channelSID,messageItem.index);
-        console.log('Message added to history form manager.');
 
         let chatItem = this.getChatItem(channelSID);
 
@@ -386,7 +375,6 @@ class TwilioChatManager
         else if (connectionState === 'connecting'){
 
         }
-        console.log(this.chatClient);
     }
 
     subscribeForClientEvents = () => {
