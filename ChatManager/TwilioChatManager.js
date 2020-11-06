@@ -102,10 +102,12 @@ class TwilioChatManager
                                        this.chatItems[i].chatPreview.unreadMessagesCount = '0';
                                    }
                                });
+                               this.setInitializationState(true);
+                               this.eventEmitter.emit('channels-loaded');
                            }
                         });
                     });
-                    this.setInitializationState(true);
+
                 });
             });
     }

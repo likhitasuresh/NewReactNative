@@ -1,10 +1,8 @@
 import React, {Component} from 'react';
 import { Container, Header, Content, List, ListItem, Left, Body, Right, Thumbnail, Text, Badge, Button, Icon, Fab } from 'native-base';
-import { event } from 'react-native-reanimated';
-import {users} from '../Data/users';
 import { LogBox } from 'react-native';
-import TwilioChatManager from '../ChatManager/TwilioChatManager';
-import { forEach } from 'lodash';
+LogBox.ignoreAllLogs();
+
 
 
 LogBox.ignoreLogs([

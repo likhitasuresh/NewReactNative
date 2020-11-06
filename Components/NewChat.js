@@ -1,8 +1,8 @@
 import React, { Component, useState, useCallback, useEffect } from 'react'
 import { GiftedChat, Bubble, Send} from 'react-native-gifted-chat'
 import {Text, View, StyleSheet} from 'react-native';
-import { Client as TwilioChatClient } from "twilio-chat";
-import MessageItem from "../ChatManager/MessageItem";
+import { LogBox } from 'react-native';
+LogBox.ignoreAllLogs();
 
 const styles = StyleSheet.create({
   sendingContainer: {
