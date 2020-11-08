@@ -33,8 +33,10 @@ class NewChat extends Component{
     this.getChannelBySID = this.params.getChannelBySID;
     this.ingestMessage = this.params.ingestNewMessage;
     this.getMessages = this.params.getMessagesFromChat;
+    this.addMessages = this.params.downloadMessageBatch;
 
     this.state = {
+      isMessagesLoading: false,
       messages: this.params.messages,
       user1: this.params.user1,
       user2: this.params.user2,
@@ -46,10 +48,9 @@ class NewChat extends Component{
   }
 
   componentDidMount(){
-    if(!this.chatInfo.isSubscribedForNewMessageInChatRoom)
-    {
-      this.subscribeForChannelEvents(this.chatInfo.channelSID,'messageAdded', this.onReceive,this.chatInfo.isSubscribedForNewMessageInChatRoom);
-    }
+      this.subscribeForChannelEvents(this.chatInfo.channelSID,
+                                    'messageAdded',
+                                    this.onReceive);
 
     if (this.chatInfo.unreadMessagesCount !== '0')
     {
@@ -77,6 +78,30 @@ class NewChat extends Component{
     return true;
  }
 
+ isCloseToTop({ layoutMeasurement, contentOffset, contentSize }) {
+    const paddingToTop = 80;
+    return contentSize.height - layoutMeasurement.height - paddingToTop <= contentOffset.y;
+  }
+
+  //TODO: ask Isidro how to prevent this to be called multiple times over there the scroll
+  loadMoreMessages = () => {
+      console.log('Load called');
+      if(!this.state.isMessagesLoading){
+          if(this.state.messages){
+              if(this.state.messages[this.state.messages.length - 1].index > 0){
+                  this.state({
+                      isMessagesLoading: true
+                  });
+                  this.addMessages(this.chatInfo.channelSID);
+                  this.setState({
+                      messages: this.getMessages(this.chatInfo.channelSID),
+                      isMessagesLoading: false
+                  });
+              }
+          }
+      }
+  }
+
 /*  TEST_renderBubble(props) {
 /!*    if (props.isSameUser(props.currentMessage, props.previousMessage) && props.isSameDay(props.currentMessage, props.previousMessage)) {
       return (
@@ -93,7 +118,6 @@ class NewChat extends Component{
             props.currentMessage.user.name !== props.user.name) === true ? <></>:
                 <Text style={{fontSize: 10,}}>{props.currentMessage.user.name}</Text>
           }
-
           <Bubble
               {...props}
               wrapperStyle={{
@@ -149,6 +173,16 @@ class NewChat extends Component{
     return(
       <>
         <GiftedChat
+            listViewProps={{
+                scrollEventThrottle: 50,
+                onScroll: ({ nativeEvent }) => {
+                    if (this.isCloseToTop(nativeEvent)) {
+                        this.setState({refreshing: true});
+                        this.loadMoreMessages();
+                    }
+                }
+            }}
+
             messages={this.state.messages}
             onSend={messages => this.onSend(messages)}
             user={this.state.user}

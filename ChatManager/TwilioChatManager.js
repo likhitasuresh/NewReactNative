@@ -1,7 +1,6 @@
 import {Client as TwilioChatClient} from "twilio-chat";
 import EventEmitter from "react-native-web/dist/vendor/react-native/emitter/EventEmitter";
 import ChatItem from "./ChatItem";
-import ChatPreview from "./ChatPreview";
 import ChannelItem from "./ChanneItem";
 import MessageItem from "./MessageItem";
 
@@ -42,8 +41,7 @@ class TwilioChatManager
         chatPreview - the small amount of information related to the channel, used to display in the chat list.
     */
     loadChannels =  () => {
-            console.log('Logged as: '+this.chatClient.user.identity);
-            this.chatItems = [];
+            this.resetDataStructures();
             this.chatClient.getUserChannelDescriptors().then((paginator) => {
                 Promise.all(paginator.items).done((descriptors) => {
                     let channels = [];
@@ -102,9 +100,9 @@ class TwilioChatManager
                                        this.chatItems[i].chatPreview.unreadMessagesCount = '0';
                                    }
                                });
-                               this.setInitializationState(true);
-                               this.eventEmitter.emit('channels-loaded');
                            }
+                            this.setInitializationState(true);
+                            this.eventEmitter.emit('channels-loaded');
                         });
                     });
 
@@ -190,7 +188,7 @@ class TwilioChatManager
                 this.channels.splice(i,1);
             }
         }
-        
+
     }
 
     initializeClient = (options={}) => {
@@ -259,6 +257,11 @@ class TwilioChatManager
 
     /*---------------------- SETTERS --------------------*/
 
+    resetDataStructures = () => {
+        this.channels = [];
+        this.chatItems = [];
+    }
+
     setInitializationState = (state) =>{
         this.isInitialized = state;
     }
@@ -292,14 +295,23 @@ class TwilioChatManager
     }
 
     //TODO: perhaps need to resubscribe after connection state changed
-    subscribeForChannelEvent(channelSID,event,callback,subscriptionFlag){
-        let that = this; //It refers to component
-        if (!subscriptionFlag){
-            let channel = that.getChannelBySID(channelSID);
-            channel.on(event,callback);
-            subscriptionFlag = true;
-            console.log('Subscribed on channel: '+channelSID);
-        }
+    subscribeForChannelEvent(channelSID,event,callback){
+        let that = this; //It refers to the component that called the function
+        let channel = that.getChannelBySID(channelSID);
+        channel.on(event,callback);
+    }
+
+    downloadMessageBatch = (channelSID) => {
+        let channel = this.getChannelBySID(channelSID);
+        let chatItem = this.getChatItem(channelSID);
+        let latestMessageIndex = chatItem.messageHistory[chatItem.messageHistory.length -1].index;
+        channel.getMessages(this.messageBatchSize,latestMessageIndex).then((peginator) => {
+            Promise.all(peginator.items).then((messages)=>{
+                chatItem.addMessagesToHistory(messages);
+            });
+
+        })
+
     }
 
     //TODO: delete when events handeled properly
@@ -344,11 +356,11 @@ class TwilioChatManager
     fetchNewToken = () => {
         //TODO: use gql to fetch the token
         if (this.userName === 'louis@nuleep-user.com')
-            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTS2E3ZWJkZDVkMmEwNjA4Y2MzM2JhNjIyYTczMDU3Y2VhLTE2MDQ2Mzg0NDYiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0NjM4NDQ2LCJleHAiOjE2MDQ2NTI4NDYsImlzcyI6IlNLYTdlYmRkNWQyYTA2MDhjYzMzYmE2MjJhNzMwNTdjZWEiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.LbMwdJBD1Ud23H57b4Bkzb4hSXTq1bmhj1Gmj9QyIzg';
+            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzVkMmJkOTA0ZjYzNTlhN2IxNWMwOTMwMWRkMDc4ODc3LTE2MDQ3OTI0NDkiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0NzkyNDQ5LCJleHAiOjE2MDQ4MDY4NDksImlzcyI6IlNLNWQyYmQ5MDRmNjM1OWE3YjE1YzA5MzAxZGQwNzg4NzciLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.x0oYFfTmdJTffpy-Futu9bivh_Ao3ohtudzVODciIBo';
         else if (this.userName === 'janesmith@nuleep-rec.com')
             return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzhjOGNmZjhhNjhiMDk3ZjM3MDViNjA5Zjg4Mzg4ZTVmLTE2MDQ2ODMyOTciLCJncmFudHMiOnsiaWRlbnRpdHkiOiJqYW5lc21pdGhAbnVsZWVwLXJlYy5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0NjgzMjk3LCJleHAiOjE2MDQ2OTc2OTcsImlzcyI6IlNLOGM4Y2ZmOGE2OGIwOTdmMzcwNWI2MDlmODgzODhlNWYiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.1YzS9pDgB2TVDAtNrapQEq1ypfsyJU7Qyvcv5kwm7ws';
         else if (this.userName === 'joeruiz@nuleep-rec.com')
-            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzY5MTU3YjY0OTIxZmE4NWU1ZDY5ZmI4MWEyZTlhNzE4LTE2MDQ2MjI1OTgiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJqb2VydWl6QG51bGVlcC1yZWMuY29tIiwiY2hhdCI6eyJzZXJ2aWNlX3NpZCI6IklTN2Y1MTIyZmM3YWE3NGUwNWJmMDA1ODM1ZTUzZjU5OTcifX0sImlhdCI6MTYwNDYyMjU5OCwiZXhwIjoxNjA0NjM2OTk4LCJpc3MiOiJTSzY5MTU3YjY0OTIxZmE4NWU1ZDY5ZmI4MWEyZTlhNzE4Iiwic3ViIjoiQUNhNzZiM2ZlZmY2MGY4YjkxODU0YTYxYjMzZjY5NjVhNiJ9.EhJ5eAsutLgxI13vi41DL44xjweU7LChQm3rNmRCnPU';
+            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzA4MWM4YmNkNjI5YTQ5MTY4NDMwMzIxYzA1ZDU4OWI0LTE2MDQ2OTY0NTciLCJncmFudHMiOnsiaWRlbnRpdHkiOiJqb2VydWl6QG51bGVlcC1yZWMuY29tIiwiY2hhdCI6eyJzZXJ2aWNlX3NpZCI6IklTN2Y1MTIyZmM3YWE3NGUwNWJmMDA1ODM1ZTUzZjU5OTcifX0sImlhdCI6MTYwNDY5NjQ1NywiZXhwIjoxNjA0NzEwODU3LCJpc3MiOiJTSzA4MWM4YmNkNjI5YTQ5MTY4NDMwMzIxYzA1ZDU4OWI0Iiwic3ViIjoiQUNhNzZiM2ZlZmY2MGY4YjkxODU0YTYxYjMzZjY5NjVhNiJ9.nuU_fe6khrZutwsICe_I-88dnnmeTojIaKb94ILrfF4';
         else if (this.userName === 'annie@nuleep-user.com')
             return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzFkNzY5YzBkOGM3ZDBiMGI1ZTg4MmU0N2VmY2Y3OWNkLTE2MDQ1MzMzMDkiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJhbm5pZUBudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0NTMzMzA5LCJleHAiOjE2MDQ1NDc3MDksImlzcyI6IlNLMWQ3NjljMGQ4YzdkMGIwYjVlODgyZTQ3ZWZjZjc5Y2QiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.B1duwdvsX-YnhdgFwgVqudttwUK7TEDP8Ys-zdVK_Vk';
     };
@@ -390,7 +402,10 @@ class TwilioChatManager
             this.loadChannels();
         }
         else if (connectionState === 'connecting'){
-
+            //TODO: switch off the subscription flags.
+        }
+        else if (connectionState === 'disconnected'){
+            //TODO: switch off the subscription flags.
         }
     }
 
@@ -413,20 +428,6 @@ class TwilioChatManager
         });
     }
 
-    janeJoin = () => {
-        this.chatClient.getChannelBySid('CHb2184701ed364089912fd5212f88c2cb').then((channel) => {
-            channel.join().then((result) => {
-                console.log('Jane joined');
-            });
-        });
-    }
-
-    joinBothUsers = () => {
-        this.chatClient.getChannelBySid('CH891cbd3784684e6bb46baca067e311e3').then((channel) =>{
-            channel.sendMessage(this.INITIAL_MESSAGE_TEXT);
-        });
-    }
-
     TEST_deleteChannel = () =>{
         this.chatClient.getChannelByUniqueName('janesmith@nuleep-rec.com*joeruiz@nuleep-rec.com').then((channel)=>{
             channel.delete();
@@ -437,7 +438,9 @@ class TwilioChatManager
         this.chatClient.getChannelByUniqueName('annie@user.com*joeruiz@nuleep-rec.com').then((channel)=>{
             channel.delete();
         });
-
+        this.chatClient.getChannelByUniqueName('joeruiz@nuleep-rec.com*louis@nuleep-user.com').then((channel) => {
+            channel.delete();
+        });
     }
 
 }

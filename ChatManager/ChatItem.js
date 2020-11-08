@@ -60,9 +60,9 @@ class ChatItem
         this.chatPreview.unreadMessagesCount = number.toString();
     }
 
-    addBatchToHistory = (messageBatch) => {
-        for(let i = 0;i<messageBatch.length;i++){
-            this.messageHistory.push(messageBatch[i]);
+    addMessagesToHistory = (messages) => {
+        for(let i = 0;i<messages.length;i++){
+            this.messageHistory.push(MessageItem.createFromTwilioMessage(messages[i]));
         }
     }
 

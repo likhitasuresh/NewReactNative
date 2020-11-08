@@ -2,13 +2,8 @@ import React, {Component} from 'react';
 import { Container, Header, Content, List, ListItem, Left, Body, Right, Thumbnail, Text, Badge, Button, Icon, Fab, Spinner } from 'native-base';
 import { MenuProvider } from 'react-native-popup-menu';
 import { LogBox } from 'react-native';
-LogBox.ignoreAllLogs();
 
 
-
-LogBox.ignoreLogs([
-    'Non-serializable values were found in the navigation state!',
-]);
 
 class Chat extends Component {
     //TODO: Initialiaze client here, load the channels list, subscribe for events listening.
@@ -27,30 +22,26 @@ class Chat extends Component {
             search: '',
             isLoading: true,
             chatsList: [],
-            previews: [], 
+            previews: [],
             isVisible: false
         };
         this.chatManagerFunctions = this.props.route.params.managerFunctions;
-        
     }
 
     componentDidMount() {
-        console.log('Mounted');
-        this.setState({
-            previews: this.chatManagerFunctions.getChatPreviews()
-        });
-        console.log(this.state.previews);
-
+        this.updateHistory();
+        this.state.previews = this.chatManagerFunctions.getChatPreviews();
         for(let i = 0;i<this.state.previews.length;i++){
-            if(!this.state.previews[i].isSubscribedForNewMessageInChatList){
                 this.chatManagerFunctions.subscribeForChannelEvent(
                     this.state.previews[i].channelSID,
                     'messageAdded',
-                    this.updateHistory,
-                    this.state.previews[i].isSubscribedForNewMessageInChatList
+                    this.updateHistory
                 );
-            }
         }
+    }
+
+    switchSubscriptionOff = (preview) => {
+        preview.isSubscribedForNewMessageInChatList = true;
     }
 
     updateHistory = ()=>{
@@ -76,18 +67,27 @@ class Chat extends Component {
             someDate.getFullYear() === today.getFullYear();
     }
 
+    formatAMPM = (date)=> {
+        let hours = date.getHours();
+        let minutes = date.getMinutes();
+        let ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        minutes = minutes < 10 ? '0'+minutes : minutes;
+        let strTime = hours + ':' + minutes + ' ' + ampm;
+        return strTime;
+    }
+
     getLastMessageDate = (date) =>
     {
-        if(date !== 'undefined'){
+        if(date){
             let messageDate = date.getTime();
-            let currentTime = Date.now();
+            let today = new Date().getTime();
 
             if (this.isToday(date)) {
-                let timeString = ('0'+date.getHours()).slice(-2)+':'+
-                    ('0'+date.getMinutes()).slice(-2);
-                return timeString;
+                return this.formatAMPM(date);
             }
-            else if (messageDate < (currentTime - 604800000)) {
+            else if (today - messageDate>= 86400000) {
                 let weekday = new Array(7);
                 weekday[0] = "Sunday";
                 weekday[1] = "Monday";
@@ -99,7 +99,7 @@ class Chat extends Component {
                 let onlyDate = weekday[date.getDay()];
                 try
                 {
-                    return onlyDate;
+                    return onlyDate+' '+this.formatAMPM(date);
                 }
                 catch (exception) {
                     return 'Error loading';
@@ -138,7 +138,8 @@ class Chat extends Component {
                             subscribeForEventFunc,
                             getChannelBySID,
                             ingestNewMessage,
-                            getMessagesFromChat
+                            getMessagesFromChat,
+                            downloadMessageBatch
                             ) => {
 
         this.navigate('NewChat', {
@@ -151,7 +152,8 @@ class Chat extends Component {
             subscribeForChannelEvent: subscribeForEventFunc,
             getChannelBySID: getChannelBySID,
             ingestNewMessage: ingestNewMessage,
-            getMessagesFromChat: getMessagesFromChat
+            getMessagesFromChat: getMessagesFromChat,
+            downloadMessageBatch: downloadMessageBatch
         });
     }
 
@@ -197,7 +199,7 @@ class Chat extends Component {
 
     render() {
         const { search } = this.state;
-        console.log(this.state.previews.length);
+
         if (this.state.previews.length > 0)
         {
             return (
@@ -217,9 +219,10 @@ class Chat extends Component {
                                             this.chatManagerFunctions.subscribeForChannelEvent,
                                             this.chatManagerFunctions.getChannelBySID,
                                             this.chatManagerFunctions.ingestNewMessage,
-                                            this.chatManagerFunctions.getMessagesFromChat
+                                            this.chatManagerFunctions.getMessagesFromChat,
+                                            this.chatManagerFunctions.downloadMessageBatch
                                         );
-                                    }} 
+                                    }}
                                     onLongPress={() => this.deleteChat(chat.channelSID)}
                                     style={{
                                         minHeight: 35
@@ -253,7 +256,7 @@ class Chat extends Component {
                             })
                         }
                     </List>
-                    
+
                     <Fab
                         active={this.state.active}
                         direction="right"

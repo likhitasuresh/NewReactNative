@@ -22,7 +22,7 @@ class Home extends React.Component {
         let jane = "janesmith@nuleep-rec.com";
         let joe = 'joeruiz@nuleep-rec.com';
         let ann = 'annie@user.com';
-        TwilioChatManager.create(jane).then((manager) => {
+        TwilioChatManager.create(luis).then((manager) => {
             this.chatManager = manager;
             this.chatManager.eventEmitter.addListener('channels-loaded',()=>{this.setState({})});
         });
@@ -48,7 +48,8 @@ class Home extends React.Component {
                                     subscribeForChannelEvent: this.chatManager.subscribeForChannelEvent,
                                     ingestNewMessage: this.chatManager.ingestNewMessage,
                                     createNewChannel: this.chatManager.createNewChannel,
-                                    deleteChat: this.chatManager.deleteChannel
+                                    deleteChat: this.chatManager.deleteChannel,
+                                    downloadMessageBatch: this.chatManager.downloadMessageBatch
                                 }
                             });
                         }}
