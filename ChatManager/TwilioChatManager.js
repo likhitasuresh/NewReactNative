@@ -318,7 +318,7 @@ class TwilioChatManager
         })
 
     }
-    
+
     indexIsInHistory = (index,history) => {
         for (let i = 0;i<history.length;i++){
             if (history[i].index === index)
