@@ -49,7 +49,8 @@ class Home extends React.Component {
                                     ingestNewMessage: this.chatManager.ingestNewMessage,
                                     createNewChannel: this.chatManager.createNewChannel,
                                     deleteChat: this.chatManager.deleteChannel,
-                                    downloadMessageBatch: this.chatManager.downloadMessageBatch
+                                    downloadMessageBatch: this.chatManager.downloadMessageBatch,
+                                    removeChannelSubscription: this.chatManager.removeChannelSubscription
                                 }
                             });
                         }}

@@ -35,16 +35,22 @@ class Chat extends Component {
                 this.chatManagerFunctions.subscribeForChannelEvent(
                     this.state.previews[i].channelSID,
                     'messageAdded',
-                    this.updateHistory
+                    this.updateHistory,
                 );
         }
     }
 
-    switchSubscriptionOff = (preview) => {
-        preview.isSubscribedForNewMessageInChatList = true;
+    componentWillUnmount() {
+        for(let i = 0;i<this.state.previews.length;i++){
+            this.chatManagerFunctions.removeChannelSubscription(
+                this.state.previews[i].channelSID,
+                'messageAdded'
+            );
+        }
     }
 
     updateHistory = ()=>{
+        console.log('Chat list evet.');
         this.setState({
             previews: this.chatManagerFunctions.getChatPreviews()
         });
@@ -87,7 +93,10 @@ class Chat extends Component {
             if (this.isToday(date)) {
                 return this.formatAMPM(date);
             }
-            else if (today - messageDate>= 86400000) {
+            else if (today - messageDate < 86400000){
+                return 'Yesterday '+this.formatAMPM(date);
+            }
+            else if (today - messageDate >= 86400000) {
                 let weekday = new Array(7);
                 weekday[0] = "Sunday";
                 weekday[1] = "Monday";
@@ -107,6 +116,7 @@ class Chat extends Component {
             }
             else
             {
+                console.log(today - date.getTime());
                 return date.toDateString();
             }
         }
@@ -139,7 +149,8 @@ class Chat extends Component {
                             getChannelBySID,
                             ingestNewMessage,
                             getMessagesFromChat,
-                            downloadMessageBatch
+                            downloadMessageBatch,
+                            removeChannelSubscription
                             ) => {
 
         this.navigate('NewChat', {
@@ -153,7 +164,8 @@ class Chat extends Component {
             getChannelBySID: getChannelBySID,
             ingestNewMessage: ingestNewMessage,
             getMessagesFromChat: getMessagesFromChat,
-            downloadMessageBatch: downloadMessageBatch
+            downloadMessageBatch: downloadMessageBatch,
+            removeChannelSubscription: removeChannelSubscription
         });
     }
 
@@ -220,7 +232,8 @@ class Chat extends Component {
                                             this.chatManagerFunctions.getChannelBySID,
                                             this.chatManagerFunctions.ingestNewMessage,
                                             this.chatManagerFunctions.getMessagesFromChat,
-                                            this.chatManagerFunctions.downloadMessageBatch
+                                            this.chatManagerFunctions.downloadMessageBatch,
+                                            this.chatManagerFunctions.removeChannelSubscription
                                         );
                                     }}
                                     onLongPress={() => this.deleteChat(chat.channelSID)}

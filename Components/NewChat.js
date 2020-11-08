@@ -34,6 +34,7 @@ class NewChat extends Component{
     this.ingestMessage = this.params.ingestNewMessage;
     this.getMessages = this.params.getMessagesFromChat;
     this.addMessages = this.params.downloadMessageBatch;
+    this.removeChannelSubscription = this.params.removeChannelSubscription;
 
     this.state = {
       isMessagesLoading: false,
@@ -50,7 +51,9 @@ class NewChat extends Component{
   componentDidMount(){
       this.subscribeForChannelEvents(this.chatInfo.channelSID,
                                     'messageAdded',
-                                    this.onReceive);
+                                    this.onReceive,
+                                    this.chatInfo,
+                                    'isSubscribedForNewMessageInChatRoom');
 
     if (this.chatInfo.unreadMessagesCount !== '0')
     {
@@ -60,13 +63,18 @@ class NewChat extends Component{
     }
   }
 
-  onSend(messages){
+  componentWillUnmount() {
+      this.removeChannelSubscription(this.chatInfo.channelSID,'messageAdded');
+  }
+
+    onSend(messages){
     for(let i = 0;i<messages.length;i++){
         this.sendMessageFunction(this.chatInfo.channelSID,messages[i].text);
       }
     }
 
     onReceive = () => {
+        console.log('Chat event.');
       this.setState({
         messages: this.getMessages(this.chatInfo.channelSID)
       });
@@ -85,11 +93,10 @@ class NewChat extends Component{
 
   //TODO: ask Isidro how to prevent this to be called multiple times over there the scroll
   loadMoreMessages = () => {
-      console.log('Load called');
       if(!this.state.isMessagesLoading){
           if(this.state.messages){
               if(this.state.messages[this.state.messages.length - 1].index > 0){
-                  this.state({
+                  this.setState({
                       isMessagesLoading: true
                   });
                   this.addMessages(this.chatInfo.channelSID);
@@ -174,7 +181,7 @@ class NewChat extends Component{
       <>
         <GiftedChat
             listViewProps={{
-                scrollEventThrottle: 50,
+                scrollEventThrottle: 2000,
                 onScroll: ({ nativeEvent }) => {
                     if (this.isCloseToTop(nativeEvent)) {
                         this.setState({refreshing: true});

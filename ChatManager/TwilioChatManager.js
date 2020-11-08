@@ -301,6 +301,11 @@ class TwilioChatManager
         channel.on(event,callback);
     }
 
+    removeChannelSubscription = (channelSID, event) =>{
+        let channel = this.getChannelBySID(channelSID);
+        channel.removeAllListeners(event);
+    }
+
     downloadMessageBatch = (channelSID) => {
         let channel = this.getChannelBySID(channelSID);
         let chatItem = this.getChatItem(channelSID);
@@ -313,23 +318,7 @@ class TwilioChatManager
         })
 
     }
-
-    //TODO: delete when events handeled properly
-    ingestNewMessage = (channelSID,message,history,component) => {
-        let messageItem = MessageItem.createFromTwilioMessage(message);
-
-        this.setAllMessagesConsumed(channelSID,messageItem.index);
-
-        let chatItem = this.getChatItem(channelSID);
-
-        history.unshift(messageItem);
-        chatItem.update();
-
-        component.setState({
-            messages: history
-        });
-    }
-
+    
     indexIsInHistory = (index,history) => {
         for (let i = 0;i<history.length;i++){
             if (history[i].index === index)
@@ -356,7 +345,7 @@ class TwilioChatManager
     fetchNewToken = () => {
         //TODO: use gql to fetch the token
         if (this.userName === 'louis@nuleep-user.com')
-            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzVkMmJkOTA0ZjYzNTlhN2IxNWMwOTMwMWRkMDc4ODc3LTE2MDQ3OTI0NDkiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0NzkyNDQ5LCJleHAiOjE2MDQ4MDY4NDksImlzcyI6IlNLNWQyYmQ5MDRmNjM1OWE3YjE1YzA5MzAxZGQwNzg4NzciLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.x0oYFfTmdJTffpy-Futu9bivh_Ao3ohtudzVODciIBo';
+            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzg2YmJmYjI5ZjVlMWE1ZDQwYTYyNzY3ZDVmYzExOGZjLTE2MDQ4NzY0ODUiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0ODc2NDg1LCJleHAiOjE2MDQ4OTA4ODUsImlzcyI6IlNLODZiYmZiMjlmNWUxYTVkNDBhNjI3NjdkNWZjMTE4ZmMiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.bOnm38z5P2WnVMLd1HuCXISUpbOnLANqNqDg6eG4nkA';
         else if (this.userName === 'janesmith@nuleep-rec.com')
             return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzhjOGNmZjhhNjhiMDk3ZjM3MDViNjA5Zjg4Mzg4ZTVmLTE2MDQ2ODMyOTciLCJncmFudHMiOnsiaWRlbnRpdHkiOiJqYW5lc21pdGhAbnVsZWVwLXJlYy5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0NjgzMjk3LCJleHAiOjE2MDQ2OTc2OTcsImlzcyI6IlNLOGM4Y2ZmOGE2OGIwOTdmMzcwNWI2MDlmODgzODhlNWYiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.1YzS9pDgB2TVDAtNrapQEq1ypfsyJU7Qyvcv5kwm7ws';
         else if (this.userName === 'joeruiz@nuleep-rec.com')
@@ -408,6 +397,7 @@ class TwilioChatManager
             //TODO: switch off the subscription flags.
         }
     }
+
 
     subscribeForClientEvents = () => {
         /*-------TWILIO-------*/
