@@ -1,50 +1,64 @@
 import React, {Component} from 'react';
-import { Container, Header, Content, List, ListItem, Left, Body, Right, Thumbnail, Text, Badge, Button, Icon, Fab } from 'native-base';
-import { event } from 'react-native-reanimated';
-import {users} from '../Data/users';
+import { Container, Header, Content, List, ListItem, Left, Body, Right, Thumbnail, Text, Badge, Button, Icon, Fab, Spinner } from 'native-base';
+import { MenuProvider } from 'react-native-popup-menu';
 import { LogBox } from 'react-native';
-import TwilioChatManager from '../ChatManager/TwilioChatManager';
-import { forEach } from 'lodash';
 
-LogBox.ignoreLogs([
-    'Non-serializable values were found in the navigation state',
-]);
+
 
 class Chat extends Component {
     //TODO: Initialiaze client here, load the channels list, subscribe for events listening.
     constructor(props){
         super(props);
         this.navigate = this.props.navigation.navigate;
+        this.props.navigation.setOptions({
+            headerStyle: {
+                backgroundColor: '#15adaa'
+            },
+            headerTintColor: '#ffffff',
+            title: 'Conversations'
+        });
+
         this.state = {
             search: '',
             isLoading: true,
-            chatsList: []
+            chatsList: [],
+            previews: [],
+            isVisible: false
         };
-        this.chatManager = this.props.route.params.chatManager;
+        this.chatManagerFunctions = this.props.route.params.managerFunctions;
     }
 
     componentDidMount() {
-        this.chatManager.chatItems.forEach(item => {
-            console.log(item.chatPreview.channelName)
-
-            this.setState({
-            chatsList: this.state.chatsList.push(item.chatPreview.channelName)
-        })});
-        console.log(this.state.chatsList)
+        this.updateHistory();
+        this.state.previews = this.chatManagerFunctions.getChatPreviews();
+        for(let i = 0;i<this.state.previews.length;i++){
+                this.chatManagerFunctions.subscribeForChannelEvent(
+                    this.state.previews[i].channelSID,
+                    'messageAdded',
+                    this.updateHistory,
+                );
+        }
     }
 
+    componentWillUnmount() {
+        for(let i = 0;i<this.state.previews.length;i++){
+            this.chatManagerFunctions.removeChannelSubscription(
+                this.state.previews[i].channelSID,
+                'messageAdded'
+            );
+        }
+    }
 
+    updateHistory = ()=>{
+        console.log('Chat list evet.');
+        this.setState({
+            previews: this.chatManagerFunctions.getChatPreviews()
+        });
+    }
 
     channelsLoadedHandler = () =>{
         this.setState({isLoading: false});
     }
-
-    getUniqueChannelName = (userEmail_a,userEmail_b) => {
-        //Creates unique chat name that contains both user names in a uniform way.
-        //uniqueName - concatenation with * of the sorted array of the user ids.
-        let user_list = [userEmail_a,userEmail_b].sort();
-        return user_list.join('*');
-    };
 
     getInterlocutorName = (channel) => {
         //Extract interlocutor userId from the channel name.
@@ -52,129 +66,106 @@ class Chat extends Component {
         return locutors.some((locutor) => locutor !== this.userEmail);
     }
 
-    getConsumtionState = (channel) => {
-        //True if all the messages in the channel have been read,
-        // false otherwise.
-        try
-        {
-            let unConsumedMessages = channel.getUnconsumedMessagesCount();
-            return true;
-        }
-        catch (exception)
-        {
-            return false;
-        }
+    isToday = (someDate) => {
+        const today = new Date()
+        return someDate.getDate() === today.getDate() &&
+            someDate.getMonth() === today.getMonth() &&
+            someDate.getFullYear() === today.getFullYear();
     }
 
-    getUnconsumedMessagesNumber = (channel) => {
-        //Returns the number of unread messages in the channel.
-        try
-        {
-            console.log('Trying fetch unconsumed messages...');
-            channel.getUnconsumedMessagesCount()
-                .then((result) => {
-                    console.log('Uncosumed messages: '+result.toString());
-                    return result.toString();
-                });
-        }
-        catch (exception)
-        {
-            console.log('Could not load unconsumed messages.');
-            return '0';
-        }
+    formatAMPM = (date)=> {
+        let hours = date.getHours();
+        let minutes = date.getMinutes();
+        let ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        minutes = minutes < 10 ? '0'+minutes : minutes;
+        let strTime = hours + ':' + minutes + ' ' + ampm;
+        return strTime;
     }
 
-    getLastMessage = (channel) => {
-        //Returns the text of the last message,
-        // 'Chat is empty' otherwise.
-        try
-        {
-            let message = channel.getMessages(1).then((message) => {
-                if (message === 'undefined')
-                    return 'Empty message downloaded';
-                else
-                    return message.body;
-            });
-        }
-        catch (exception)
-        {
-            return exception.message.toString();
-        }
-    }
-
-    getChannelName = (channel) => {
-        try
-        {
-            let cname = channel.uniqueName;
-            if (cname === 'undefined')
-                return 'Error occured';
-            return cname;
-        }
-        catch (exception)
-        {
-            return 'Error occured';
-        }
-    }
-
-    //TODO: what to return if no messages exist in the chat?
     getLastMessageDate = (date) =>
     {
-        var messageDate = date.getTime();
-        var currentTime = Date.now();
-        if (messageDate >= currentTime - 604800000) {
-            try
+        if(date){
+            let messageDate = date.getTime();
+            let today = new Date().getTime();
+
+            if (this.isToday(date)) {
+                return this.formatAMPM(date);
+            }
+            else if (today - messageDate < 86400000){
+                return 'Yesterday '+this.formatAMPM(date);
+            }
+            else if (today - messageDate >= 86400000) {
+                let weekday = new Array(7);
+                weekday[0] = "Sunday";
+                weekday[1] = "Monday";
+                weekday[2] = "Tuesday";
+                weekday[3] = "Wednesday";
+                weekday[4] = "Thursday";
+                weekday[5] = "Friday";
+                weekday[6] = "Saturday";
+                let onlyDate = weekday[date.getDay()];
+                try
+                {
+                    return onlyDate+' '+this.formatAMPM(date);
+                }
+                catch (exception) {
+                    return 'Error loading';
+                }
+            }
+            else
             {
+                console.log(today - date.getTime());
                 return date.toDateString();
             }
-            catch (exception) {
-                return 'Error loading';
-            }
         }
-        else if (messageDate < currentTime - 604800000) {
-            var weekday = new Array(7);
-            weekday[0] = "Sunday";
-            weekday[1] = "Monday";
-            weekday[2] = "Tuesday";
-            weekday[3] = "Wednesday";
-            weekday[4] = "Thursday";
-            weekday[5] = "Friday";
-            weekday[6] = "Saturday";
-            var onlyDate = weekday[date.getDay()]
-            try
-            {
-                return onlyDate;
-            }
-            catch (exception) {
-                return 'Error loading';
-            }
+        else
+        {
+            return 'Read error';
         }
-    }
 
-    //TODO: what if there is no messages in the channel?
-    getMessageBatch = (channel,batchSize=30) =>
-    {
-        //Loads a batch of batchSize last messages in the channel,
-        //otherwise ???
-        try
-        {
-            return channel.getMessages(batchSize).items;
-        }
-        catch (exception)
-        {
-            return '';
-        }
     }
 
     updateSearch = (search) => {
         this.setState({ search });
     };
 
-    openDetailedChatView = (name, messages, user1, user2) => {
+    // you should pass SID like onLongPress = ()=>{this.deleteChat(chat.channelSID)}
+    deleteChat(channelSID){
+        this.chatManagerFunctions.deleteChat(channelSID);
+        this.setState({
+            previews: this.chatManagerFunctions.getChatPreviews()
+        });
+    }
+
+    openDetailedChatView = (chatPreview,
+                            messages,
+                            user1,
+                            user2,
+                            sendFunction,
+                            unconsumedIndexUpdateFunction,
+                            subscribeForEventFunc,
+                            getChannelBySID,
+                            ingestNewMessage,
+                            getMessagesFromChat,
+                            downloadMessageBatch,
+                            removeChannelSubscription
+                            ) => {
+
         this.navigate('NewChat', {
-            channelName: name,
+            chatPreview: chatPreview,
             messages: messages,
             user1: user1,
-            user2: user2
+            user2: user2,
+            sendMessage: sendFunction,
+            setAllMessagesConsumed: unconsumedIndexUpdateFunction,
+            subscribeForChannelEvent: subscribeForEventFunc,
+            getChannelBySID: getChannelBySID,
+            ingestNewMessage: ingestNewMessage,
+            getMessagesFromChat: getMessagesFromChat,
+            downloadMessageBatch: downloadMessageBatch,
+            removeChannelSubscription: removeChannelSubscription
         });
     }
 
@@ -186,12 +177,27 @@ class Chat extends Component {
     }
 
     createNewChannel(){
-        console.log("hi hello");
-        console.log(this.state.chatsList);
+        console.log("Add new user");
+
         this.navigate('CreateNewChannel', {
-            chatsList: this.state.chatsList
+            chatsList: this.chatManagerFunctions.getChatNames,
+            managerFunctions: this.chatManagerFunctions
         });
     }
+
+    displayMessage = (message,messageLength=50) => {
+        if(message.length > messageLength){
+            let truncatedMessage = message.slice(0,messageLength-3);
+            truncatedMessage+='...';
+            return truncatedMessage;
+        }
+        else
+        {
+            return message;
+        }
+
+    }
+
     static navigationOptions = {
         title: 'Chat',
         headerStyle: {
@@ -205,53 +211,70 @@ class Chat extends Component {
 
     render() {
         const { search } = this.state;
-        if (this.chatManager.chatItems.length > 0)
+
+        if (this.state.previews.length > 0)
         {
             return (
                 <Container>
                     <List>
                         {
-                            this.chatManager.chatItems.map((chatItem,i) => {
-                                let chat = chatItem.chatPreview;
+                            this.state.previews.map((chat,i) => {
                                 return (
                                     <ListItem key={i} avatar onPress={() => {
                                         // TODO pass user1 ID and user2 ID
-                                        let user1 = "IM79d68aeea50a4103908c9ca0ec82f146";
-                                        let user2 = "IMe2f98d343dbd45aeac9ca34f7b85d2a3";
-                                        this.openDetailedChatView(chat.channelName, this.chatManager.getMessagesFromChat(chat.channelSID), user1, user2 );
+                                        this.openDetailedChatView(chat,
+                                            this.chatManagerFunctions.getMessagesFromChat(chat.channelSID),
+                                            chat.currentUser,
+                                            chat.interlocutor,
+                                            this.chatManagerFunctions.sendMessage,
+                                            this.chatManagerFunctions.setAllMessagesConsumed,
+                                            this.chatManagerFunctions.subscribeForChannelEvent,
+                                            this.chatManagerFunctions.getChannelBySID,
+                                            this.chatManagerFunctions.ingestNewMessage,
+                                            this.chatManagerFunctions.getMessagesFromChat,
+                                            this.chatManagerFunctions.downloadMessageBatch,
+                                            this.chatManagerFunctions.removeChannelSubscription
+                                        );
+                                    }}
+                                    onLongPress={() => this.deleteChat(chat.channelSID)}
+                                    style={{
+                                        minHeight: 35
                                     }}>
                                         <Left>
                                             <Thumbnail source={{uri: 'https://placeimg.com/140/140/any'}}/>
                                             {
-                                                chat.unreadMessagesCount.toString() !== '0' ? <></> :
+                                                chat.unreadMessagesCount.toString() === '0' ? <></> :
                                                     <Badge style={{backgroundColor: '#5386C9', position: "absolute"}}>
                                                         <Text>{chat.unreadMessagesCount.toString()}</Text></Badge>
                                             }
                                         </Left>
                                         <Body>
-                                            <Text>{chat.channelName}</Text>
+                                            <Text style={{minHeight: 30}}>{chat.interlocutor}</Text>
                                             {
-                                                chat.unreadMessagesCount.toString() === '0' ?
+                                                chat.unreadMessagesCount.toString() !== '0' ?
                                                     <Text style={{
                                                         fontWeight: 'bold',
-                                                        color: 'black'
-                                                    }}>{chat.lastMessageText}</Text> :
-                                                    <Text>{chat.lastMessageText}</Text>
+                                                        color: 'black',
+                                                        minHeight: 35,
+                                                        maxHeight: 45
+                                                    }}>{this.displayMessage(chat.lastMessageText)}</Text> :
+                                                    <Text>{this.displayMessage(chat.lastMessageText)}</Text>
                                             }
                                         </Body>
                                         <Right>
-                                            <Text note>{this.getLastMessageDate(chat.lastMessageDate)}</Text>
+                                            <Text style={{}} note>{this.getLastMessageDate(chat.lastMessageDate)}</Text>
                                         </Right>
                                     </ListItem>
                                 );
                             })
                         }
                     </List>
+
                     <Fab
                         active={this.state.active}
                         direction="right"
                         containerStyle={{ marginLeft: 10}}
-                        style={{ backgroundColor: '#5067FF' }}
+                        style={{ backgroundColor: '#15aeaa' }}
                         onPress={() => this.createNewChannel() }>
                             <Icon name="md-person-add" />
                     </Fab>
@@ -259,7 +282,7 @@ class Chat extends Component {
             )}
         else
         {
-            return (<Text>Loading...</Text>);
+            return (<Spinner color='blue' />);
         }
     }
 }

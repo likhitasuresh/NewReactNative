@@ -7,11 +7,14 @@ class MessageItem
     static createFromTwilioMessage = (twilioMessage) => {
         let newMessage = {
             _id: twilioMessage.sid,
+            index: twilioMessage.index,
             text: twilioMessage.body,
-            user: twilioMessage.author,
-            createdAt: twilioMessage.timestamp
+            createdAt: twilioMessage.timestamp,
+            user: {
+                _id: twilioMessage.author,
+                name: twilioMessage.author
+            },
         };
-
         return newMessage;
     }
 

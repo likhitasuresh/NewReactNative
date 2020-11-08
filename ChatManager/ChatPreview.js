@@ -2,23 +2,37 @@ class ChatPreview
 {
     constructor()
     {
-        this.channelSid = null;
+        this.channelSID = null;
         this.lastMessageText = '';
         this.lastMessageDate = null;
         this.unreadMessagesCount = '0';
         this.channelName = '';
+
+        this.currentUser = '';
+        this.interlocutor = '';
+
+        this.currentUserSID = '';
+        this.interlocuterSID = '';
+
+        this.isSubscribedForNewMessageInChatRoom = false;
+        this.isSubscribedForNewMessageInChatList = false;
     }
 
-    getUnconsumedState = () => {
-        if (this.unreadMessagesCount !== 'undefined')
-        {
-            if(this.unreadMessagesCount === '0')
-                return true;
-            else return false;
+    setMembers = (membersList,currentUser) => {
+        this.currentUser = currentUser;
+        for (let i = 0;i<membersList.length;i++){
+            if(membersList[i].identity !== currentUser){
+                this.interlocutor = membersList[i].identity;
+                this.interlocuterSID = membersList[i].sid;
+            }
+            else {
+                this.currentUserSID = membersList[i].sid;
+            }
         }
-        //TODO: handle undefined
-        else
-            return false;
+    }
+
+    setUnconsumedMessageCountZero = () =>{
+        this.unreadMessagesCount = '0';
     }
 }
 

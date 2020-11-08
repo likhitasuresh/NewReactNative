@@ -1,6 +1,8 @@
 import React, {Component} from 'react';
 import { Platform, StyleSheet, Text, View, Button} from 'react-native';
 import TwilioChatManager from '../ChatManager/TwilioChatManager';
+import { LogBox } from 'react-native';
+LogBox.ignoreAllLogs();
 
 class Home extends React.Component {
     static navigationOptions = {
@@ -16,8 +18,13 @@ class Home extends React.Component {
 
     constructor() {
         super();
-        TwilioChatManager.create('louis@nuleep-user.com').then((manager) => {
+        let luis = 'louis@nuleep-user.com';
+        let jane = "janesmith@nuleep-rec.com";
+        let joe = 'joeruiz@nuleep-rec.com';
+        let ann = 'annie@user.com';
+        TwilioChatManager.create(luis).then((manager) => {
             this.chatManager = manager;
+            this.chatManager.eventEmitter.addListener('channels-loaded',()=>{this.setState({})});
         });
     }
 
@@ -25,14 +32,32 @@ class Home extends React.Component {
         return (
         <View style={styles.container}>
             <Text style={styles.headerText} >Home Activity</Text>
-            <Button
-            title="Go to Chat Activity"
-            onPress={() => {this.props.navigation.navigate('Chat',
-                {
-                    chatManager: this.chatManager
-                });
-            }}
-            />
+            {
+                (this.chatManager !== 'undefined') ?
+                    <Button
+                        title="Go to Chat Activity"
+                        onPress={() => {this.props.navigation.navigate('Chat',
+                            {
+                                managerFunctions: {
+                                    getMessagesFromChat: this.chatManager.getMessagesFromChat,
+                                    getChatPreviews: this.chatManager.getChatPreviews,
+                                    getChatNames: this.chatManager.getChatNames,
+                                    sendMessage: this.chatManager.sendMessage,
+                                    getChannelBySID: this.chatManager.getChannelBySID,
+                                    setAllMessagesConsumed: this.chatManager.setAllMessagesConsumed,
+                                    subscribeForChannelEvent: this.chatManager.subscribeForChannelEvent,
+                                    ingestNewMessage: this.chatManager.ingestNewMessage,
+                                    createNewChannel: this.chatManager.createNewChannel,
+                                    deleteChat: this.chatManager.deleteChannel,
+                                    downloadMessageBatch: this.chatManager.downloadMessageBatch,
+                                    removeChannelSubscription: this.chatManager.removeChannelSubscription
+                                }
+                            });
+                        }}
+                    />
+                    :<></>
+            }
+
         </View>
         );
     }

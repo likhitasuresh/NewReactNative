@@ -35,24 +35,34 @@ class ChatItem
 
     setChannelSID = (channelSID) =>{
         this.channelSID = channelSID;
-        this.chatPreview.channelSid = channelSID;
+        this.chatPreview.channelSID = channelSID;
     }
 
     setMessageHistory = (history) => {
         for (let i = 0; i < history.length; i++){
-            this.messageHistory.push(MessageItem.createFromTwilioMessage(history[i]));
+            this.messageHistory.unshift(MessageItem.createFromTwilioMessage(history[i]));
         }
-
     }
 
-    //TODO: rewrite to satisfy the view
+    //TODO: delete this one!!!
+    setFromTwilioUsers = (users,currentUser) => {
+        console.log(users);
+        this.currentUser = currentUser;
+        for(let i = 0;i<users.length;i++){
+            if(users[i].identity !== currentUser){
+                this.interlocutor = users[i].identity;
+                return;
+            }
+        }
+    }
+
     setUnreadMessages = (number) => {
-        this.chatPreview.unreadMessagesCount = number;
+        this.chatPreview.unreadMessagesCount = number.toString();
     }
 
-    addBatchToHistory = (messageBatch) => {
-        for(let i = 0;i<messageBatch.length;i++){
-            this.messageHistory.push(messageBatch[i]);
+    addMessagesToHistory = (messages) => {
+        for(let i = 0;i<messages.length;i++){
+            this.messageHistory.push(MessageItem.createFromTwilioMessage(messages[i]));
         }
     }
 
