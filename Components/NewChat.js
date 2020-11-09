@@ -51,8 +51,8 @@ class NewChat extends Component{
   componentDidMount(){
 
     this.subscribeForChannelEvents(this.chatInfo.channelSID,
-      'messageAdded',
-      this.onReceive);
+                                  'messageAdded',
+                                  this.onReceive);
 
     if (this.chatInfo.unreadMessagesCount !== '0')
     {
@@ -103,37 +103,6 @@ class NewChat extends Component{
           }
       }
   }
-
-/*  TEST_renderBubble(props) {
-/!*    if (props.isSameUser(props.currentMessage, props.previousMessage) && props.isSameDay(props.currentMessage, props.previousMessage)) {
-      return (
-          <Bubble
-              {...props}
-          />
-      );
-    }*!/
-    console.log(props);
-    return (
-        <View>
-          {
-            (props.currentMessage.user.name !== props.previousMessage.user.name &&
-            props.currentMessage.user.name !== props.user.name) === true ? <></>:
-                <Text style={{fontSize: 10,}}>{props.currentMessage.user.name}</Text>
-          }
-          <Bubble
-              {...props}
-              wrapperStyle={{
-                left: {
-                  backgroundColor: '#fff'
-                },
-                right: {
-                  backgroundColor: '#15adaa'
-                },
-              }}
-          />
-        </View>
-    );
-  }*/
 
   renderSend(props) {
     return (

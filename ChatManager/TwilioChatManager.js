@@ -292,6 +292,14 @@ class TwilioChatManager
         });
     }
 
+    setUserAlias = (channelSID,userSID,alias)=>{
+        //TODO: get channel
+        // get member by identity or by the sid
+        // member.updateAttributes();
+        // update previews
+        // update channel history
+    }
+
     /*---------------------- AUXILLARY --------------------*/
 
     //Generates the uniq name for a dialogue channel for now
