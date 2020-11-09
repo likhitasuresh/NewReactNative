@@ -28,7 +28,7 @@ class NewChat extends Component{
 
 
     this.sendMessageFunction = this.params.sendMessage;
-    this.unconsumedIndexUpdateFunction = this.params.setAllMessagesConsumed;
+    this.setAllMessagesConsumed = this.params.setAllMessagesConsumed;
     this.subscribeForChannelEvents = this.params.subscribeForChannelEvent;
     this.getChannelBySID = this.params.getChannelBySID;
     this.ingestMessage = this.params.ingestNewMessage;
@@ -49,22 +49,16 @@ class NewChat extends Component{
   }
 
   componentDidMount(){
-      this.subscribeForChannelEvents(this.chatInfo.channelSID,
-                                    'messageAdded',
-                                    this.onReceive,
-                                    this.chatInfo,
-                                    'isSubscribedForNewMessageInChatRoom');
+
+    this.subscribeForChannelEvents(this.chatInfo.channelSID,
+      'messageAdded',
+      this.onReceive);
 
     if (this.chatInfo.unreadMessagesCount !== '0')
     {
-      this.unconsumedIndexUpdateFunction(this.chatInfo.channelSID,this.state.messages[0].index);
-      //TODO: if the function above returned successful code (the event not implemented yet) set the counter to zero
+      this.setAllMessagesConsumed(this.chatInfo.channelSID,this.state.messages[0].index);
       this.chatInfo.setUnconsumedMessageCountZero();
     }
-  }
-
-  componentWillUnmount() {
-      this.removeChannelSubscription(this.chatInfo.channelSID,'messageAdded');
   }
 
     onSend(messages){
@@ -74,10 +68,11 @@ class NewChat extends Component{
     }
 
     onReceive = () => {
-        console.log('Chat event.');
+      console.log('Chat event.');
       this.setState({
         messages: this.getMessages(this.chatInfo.channelSID)
       });
+      this.chatInfo.setUnconsumedMessageCountZero();
   }
 
   isLocutor = (userName) => {

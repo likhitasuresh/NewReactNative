@@ -28,29 +28,21 @@ class Chat extends Component {
         this.chatManagerFunctions = this.props.route.params.managerFunctions;
     }
 
+    //TODO: using the navigation the component actually does not unmount but it neither rerenders
     componentDidMount() {
         this.updateHistory();
         this.state.previews = this.chatManagerFunctions.getChatPreviews();
         for(let i = 0;i<this.state.previews.length;i++){
-                this.chatManagerFunctions.subscribeForChannelEvent(
-                    this.state.previews[i].channelSID,
-                    'messageAdded',
-                    this.updateHistory,
-                );
-        }
-    }
-
-    componentWillUnmount() {
-        for(let i = 0;i<this.state.previews.length;i++){
-            this.chatManagerFunctions.removeChannelSubscription(
+            this.chatManagerFunctions.subscribeForChannelEvent(
                 this.state.previews[i].channelSID,
-                'messageAdded'
+                'messageAdded',
+                this.updateHistory,
             );
         }
     }
 
     updateHistory = ()=>{
-        console.log('Chat list evet.');
+        console.log('Chat list event.');
         this.setState({
             previews: this.chatManagerFunctions.getChatPreviews()
         });

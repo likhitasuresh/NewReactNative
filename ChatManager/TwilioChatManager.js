@@ -207,7 +207,15 @@ class TwilioChatManager
         let channelSID = message.channel.sid;
         let chatItem = this.getChatItem(channelSID);
 
-        this.setAllMessagesConsumed(channelSID,messageItem.index);
+        if(messageItem.user._id !== this.userName)
+        {
+            chatItem.chatPreview.unreadMessagesCount = (messageItem.index - chatItem.messageHistory[0].index).toString();
+        }
+        else
+        {
+            this.setAllMessagesConsumed(channelSID,messageItem.index);
+        }
+
         chatItem.messageHistory.unshift(messageItem);
         chatItem.update();
     }
@@ -215,6 +223,7 @@ class TwilioChatManager
     /*---------------------- GETTERS --------------------------*/
 
     getMessagesFromChat = (channelSID) => {
+        console.log('Getting messages');
         for(let i = 0;i < this.chatItems.length;i++) {
             if (this.chatItems[i].channelSID === channelSID){
                 return this.chatItems[i].messageHistory;
@@ -271,19 +280,16 @@ class TwilioChatManager
     };
 
     setAllMessagesConsumed = (channelSID,lastMessageIndex) =>{
-        for(let i = 0;i<this.channels.length;i++){
-            if(this.channels[i].channelSID === channelSID){
-                this.channels[i].channel.advanceLastConsumedMessageIndex(lastMessageIndex).then((number) => {
-                    if (typeof number === 'number'){
-                        // Successfull update
-                    }
-                    else
-                    {
-                        console.log('Error in Managed::setALlMessagesConsumed');
-                    }
-                })
+        let channel = this.getChannelBySID(channelSID);
+        channel.advanceLastConsumedMessageIndex(lastMessageIndex).then((number) => {
+            if (typeof number === 'number'){
+                // Successfull update
             }
-        }
+            else
+            {
+                console.log('Error in Managed::setALlMessagesConsumed');
+            }
+        });
     }
 
     /*---------------------- AUXILLARY --------------------*/
@@ -299,11 +305,13 @@ class TwilioChatManager
         let that = this; //It refers to the component that called the function
         let channel = that.getChannelBySID(channelSID);
         channel.on(event,callback);
+        console.log(channelSID+' subscribed');
     }
 
-    removeChannelSubscription = (channelSID, event) =>{
+    removeChannelSubscription = (channelSID, event,callback) =>{
         let channel = this.getChannelBySID(channelSID);
-        channel.removeAllListeners(event);
+        channel.removeAllListeners(event,callback);
+        console.log(channelSID+' unsubscribed');
     }
 
     downloadMessageBatch = (channelSID) => {
@@ -345,7 +353,7 @@ class TwilioChatManager
     fetchNewToken = () => {
         //TODO: use gql to fetch the token
         if (this.userName === 'louis@nuleep-user.com')
-            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzg2YmJmYjI5ZjVlMWE1ZDQwYTYyNzY3ZDVmYzExOGZjLTE2MDQ4NzY0ODUiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0ODc2NDg1LCJleHAiOjE2MDQ4OTA4ODUsImlzcyI6IlNLODZiYmZiMjlmNWUxYTVkNDBhNjI3NjdkNWZjMTE4ZmMiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.bOnm38z5P2WnVMLd1HuCXISUpbOnLANqNqDg6eG4nkA';
+            return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzg1NzE3ODdlNTdlODA3NDg0OGUxYzIwN2M1NDEwMTMwLTE2MDQ4OTEwMTYiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJsb3Vpc0BudWxlZXAtdXNlci5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0ODkxMDE2LCJleHAiOjE2MDQ5MDU0MTYsImlzcyI6IlNLODU3MTc4N2U1N2U4MDc0ODQ4ZTFjMjA3YzU0MTAxMzAiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.RG7J_jlRdIRH_naQIlqC4RiqcJIZku55Df38H9MBLn0';
         else if (this.userName === 'janesmith@nuleep-rec.com')
             return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzhjOGNmZjhhNjhiMDk3ZjM3MDViNjA5Zjg4Mzg4ZTVmLTE2MDQ2ODMyOTciLCJncmFudHMiOnsiaWRlbnRpdHkiOiJqYW5lc21pdGhAbnVsZWVwLXJlYy5jb20iLCJjaGF0Ijp7InNlcnZpY2Vfc2lkIjoiSVM3ZjUxMjJmYzdhYTc0ZTA1YmYwMDU4MzVlNTNmNTk5NyJ9fSwiaWF0IjoxNjA0NjgzMjk3LCJleHAiOjE2MDQ2OTc2OTcsImlzcyI6IlNLOGM4Y2ZmOGE2OGIwOTdmMzcwNWI2MDlmODgzODhlNWYiLCJzdWIiOiJBQ2E3NmIzZmVmZjYwZjhiOTE4NTRhNjFiMzNmNjk2NWE2In0.1YzS9pDgB2TVDAtNrapQEq1ypfsyJU7Qyvcv5kwm7ws';
         else if (this.userName === 'joeruiz@nuleep-rec.com')
