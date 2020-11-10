@@ -61,9 +61,11 @@ class ChatItem
     }
 
     addMessagesToHistory = (messages) => {
+        let batch = [];
         for(let i = 0;i<messages.length;i++){
-            this.messageHistory.push(MessageItem.createFromTwilioMessage(messages[i]));
+            batch.unshift(MessageItem.createFromTwilioMessage(messages[i]));
         }
+        Array.prototype.push.apply(this.messageHistory,batch);
     }
 
 }

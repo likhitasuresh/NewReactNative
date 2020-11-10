@@ -95,6 +95,7 @@ class NewChat extends Component{
                       isMessagesLoading: true
                   });
                   this.addMessages(this.chatInfo.channelSID);
+                  console.log('State update happened');
                   this.setState({
                       messages: this.getMessages(this.chatInfo.channelSID),
                       isMessagesLoading: false
